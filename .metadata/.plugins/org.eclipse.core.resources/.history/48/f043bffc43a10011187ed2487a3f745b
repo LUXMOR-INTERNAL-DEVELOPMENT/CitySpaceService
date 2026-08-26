@@ -1,0 +1,5 @@
+package ticketbooking.repository;
+
+public interface SeatRepository {
+
+}

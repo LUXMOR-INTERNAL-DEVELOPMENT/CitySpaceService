@@ -1,0 +1,9 @@
+package ticketbooking;
+
+public enum UserRole {
+
+    CUSTOMER,
+    ADMIN,
+    VENUE_MANAGER
+    
+}

@@ -1,0 +1,52 @@
+package ticketbooking.service;
+
+
+import ticketbooking.dto.MovieResponse;
+import ticketbooking.entity.Movie;
+import ticketbooking.repository.MovieRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class MovieService {
+
+    private final MovieRepository movieRepository;
+
+    public Page<MovieResponse> getMovies(
+            String search,
+            Pageable pageable) {
+
+        Page<Movie> movies;
+
+        if (search == null || search.isBlank()) {
+
+            movies = movieRepository.findByActiveTrue(pageable);
+
+        } else {
+
+            movies = movieRepository
+                    .findByTitleContainingIgnoreCaseAndActiveTrue(
+                            search,
+                            pageable
+                    );
+        }
+
+        return movies.map(MovieResponse::from);
+    }
+
+    public MovieResponse getMovie(Long movieId) {
+
+        Movie movie = movieRepository.findById(movieId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Movie not found: " + movieId
+                        ));
+
+        return MovieResponse.from(movie);
+    }
+}

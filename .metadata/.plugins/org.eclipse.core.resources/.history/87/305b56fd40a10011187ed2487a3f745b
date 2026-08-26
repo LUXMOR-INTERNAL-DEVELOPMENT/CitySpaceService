@@ -1,0 +1,17 @@
+package ticketbooking;
+
+public enum PaymentStatus {
+
+	 	INITIATED,
+
+	    PROCESSING,
+
+	    SUCCESS,
+
+	    FAILED,
+
+	    REFUND_PENDING,
+
+	    REFUNDED
+	    
+}

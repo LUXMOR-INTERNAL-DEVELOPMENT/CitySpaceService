@@ -1,0 +1,19 @@
+package enums;
+
+public enum BookingStatus {
+
+    INITIATED,
+
+    PAYMENT_PENDING,
+
+    CONFIRMED,
+
+    PAYMENT_FAILED,
+
+    CANCELLED,
+
+    REFUND_PENDING,
+
+    REFUNDED
+
+}

@@ -1,0 +1,5 @@
+package ticketbooking.entity;
+
+public class Payment {
+
+}
