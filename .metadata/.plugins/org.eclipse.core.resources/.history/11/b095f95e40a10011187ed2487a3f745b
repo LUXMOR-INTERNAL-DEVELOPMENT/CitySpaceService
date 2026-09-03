@@ -1,9 +1,0 @@
-package ticketbooking;
-
-public enum SeatStatus {
-	AVAILABLE,
-    LOCKED,
-    BOOKED,
-    BLOCKED
-
-}
