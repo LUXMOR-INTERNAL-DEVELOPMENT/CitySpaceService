@@ -1,0 +1,97 @@
+package eventmanagement;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
+public class UseEventBooking {
+public static void main(String[] args) {
+	// 1. Create EventBooking objects
+	
+
+    EventBooking e1 = new EventBooking(
+            "Wedding",
+            "Chennai",
+            "10-09-2026",
+            4500,
+            0,
+            500,
+            0
+    );
+
+    EventBooking e2 = new EventBooking(
+            "Birthday Party",
+            "Coimbatore",
+            "15-09-2026",
+            8000,
+            0,
+            1000,
+            0
+    );
+
+    EventBooking e3 = new EventBooking(
+            "Corporate Meeting",
+            "Bangalore",
+            "20-09-2026",
+            12000,
+            0,
+            2000,
+            0
+    );
+
+    EventBooking e4 = new EventBooking(
+            "Music Concert",
+            "Hyderabad",
+            "25-09-2026",
+            28000,
+            0,
+            3000,
+            0
+    );
+
+    EventBooking e5 = new EventBooking(
+            "Conference",
+            "Chennai",
+            "30-09-2026",
+            7500,
+            0,
+            500,
+            0
+    );
+    //2.Initializing Multiple event objects
+    EventBooking[]event= {e1,e2,e3,e4,e5};
+    
+    //3.convert array to arraylist
+    
+    //individual intialization
+    
+    ArrayList<EventBooking> eventList1 = new ArrayList<>();
+
+    eventList1.add(e1);
+    eventList1.add(e2);
+    eventList1.add(e3);
+    eventList1.add(e4);
+    eventList1.add(e5);
+
+    System.out.println("\n========== INDIVIDUAL ARRAYLIST ==========");
+
+    for (EventBooking event1 : eventList1) {
+        System.out.println(event1);
+    }
+
+    
+    //Bulk intialization
+    
+    
+    ArrayList<EventBooking> eventList2 =
+            new ArrayList<>(Arrays.asList(eventArray));
+
+    System.out.println("\n========== BULK ARRAYLIST ==========");
+
+    for (EventBooking event2 : eventList2) {
+        System.out.println(event2);
+    }
+    
+}
+
+
+}
