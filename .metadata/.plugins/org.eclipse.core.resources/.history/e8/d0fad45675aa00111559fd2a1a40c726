@@ -1,0 +1,99 @@
+package eventmanagement;
+
+public class EventBooking {
+
+
+	    private String eventName;
+	    private String eventLocation;
+	    private String bookingDate;
+	    private double bookingCost;
+	    private double tax;
+	    private double offer;
+	    private double totalCost;
+
+	    public EventBooking() {
+	    }
+
+	    public EventBooking(String eventName, String eventLocation,
+	                        String bookingDate, double bookingCost,
+	                        double tax, double offer, double totalCost) {
+
+	        this.eventName = eventName;
+	        this.eventLocation = eventLocation;
+	        this.bookingDate = bookingDate;
+	        this.bookingCost = bookingCost;
+	        this.tax = tax;
+	        this.offer = offer;
+	        this.totalCost = totalCost;
+	    }
+
+	    public String getEventName() {
+	        return eventName;
+	    }
+
+	    public void setEventName(String eventName) {
+	        this.eventName = eventName;
+	    }
+
+	    public String getEventLocation() {
+	        return eventLocation;
+	    }
+
+	    public void setEventLocation(String eventLocation) {
+	        this.eventLocation = eventLocation;
+	    }
+
+	    public String getBookingDate() {
+	        return bookingDate;
+	    }
+
+	    public void setBookingDate(String bookingDate) {
+	        this.bookingDate = bookingDate;
+	    }
+
+	    public double getBookingCost() {
+	        return bookingCost;
+	    }
+
+	    public void setBookingCost(double bookingCost) {
+	        this.bookingCost = bookingCost;
+	    }
+
+	    public double getTax() {
+	        return tax;
+	    }
+
+	    public void setTax(double tax) {
+	        this.tax = tax;
+	    }
+
+	    public double getOffer() {
+	        return offer;
+	    }
+
+	    public void setOffer(double offer) {
+	        this.offer = offer;
+	    }
+
+	    public double getTotalCost() {
+	        return totalCost;
+	    }
+
+	    public void setTotalCost(double totalCost) {
+	        this.totalCost = totalCost;
+	    }
+
+//	    @Override
+//	    public String toString() {
+//	        return "EventBooking{" +
+//	                "eventName='" + eventName + '\'' +
+//	                ", eventLocation='" + eventLocation + '\'' +
+//	                ", bookingDate='" + bookingDate + '\'' +
+//	                ", bookingCost=" + bookingCost +
+//	                ", tax=" + tax +
+//	                ", offer=" + offer +
+//	                ", totalCost=" + totalCost +
+//	                '}';
+//	    }
+//	}
+

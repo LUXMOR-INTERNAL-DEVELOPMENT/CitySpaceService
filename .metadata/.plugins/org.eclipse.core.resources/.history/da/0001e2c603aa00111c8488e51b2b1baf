@@ -1,0 +1,15 @@
+package com.example.demo.dao;
+
+import org.springframework.stereotype.Repository;
+
+import com.example.demo.repository.UserRepository;
+
+@Repository
+public class UserDao {
+
+	private final UserRepository userRepository;
+
+	UserDao(UserRepository userRepository) {
+		this.userRepository = userRepository;
+	}
+}

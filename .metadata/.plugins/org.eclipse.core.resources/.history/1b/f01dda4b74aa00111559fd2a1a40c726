@@ -1,0 +1,231 @@
+package eventmanagement;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
+public class UseEventBooking {
+public static void main(String[] args) {
+	// 1. Create EventBooking objects
+	
+
+    EventBooking e1 = new EventBooking(
+            "Wedding",
+            "Chennai",
+            "10-09-2026",
+            4500,
+            0,
+            500,
+            0
+    );
+
+    EventBooking e2 = new EventBooking(
+            "Birthday Party",
+            "Coimbatore",
+            "15-09-2026",
+            8000,
+            0,
+            1000,
+            0
+    );
+
+    EventBooking e3 = new EventBooking(
+            "Corporate Meeting",
+            "Bangalore",
+            "20-09-2026",
+            12000,
+            0,
+            2000,
+            0
+    );
+
+    EventBooking e4 = new EventBooking(
+            "Music Concert",
+            "Hyderabad",
+            "25-09-2026",
+            28000,
+            0,
+            3000,
+            0
+    );
+
+    EventBooking e5 = new EventBooking(
+            "Conference",
+            "Chennai",
+            "30-09-2026",
+            7500,
+            0,
+            500,
+            0
+    );
+    //2.Initializing Multiple event objects
+    EventBooking[]event= {e1,e2,e3,e4,e5};
+    
+    //3.convert array to arraylist
+    
+    //individual intialization
+    
+    ArrayList<EventBooking> eventList1 = new ArrayList<>();
+
+    eventList1.add(e1);
+    eventList1.add(e2);
+    eventList1.add(e3);
+    eventList1.add(e4);
+    eventList1.add(e5);
+
+    System.out.println("\n========== INDIVIDUAL ARRAYLIST ==========");
+
+    for (EventBooking event1 : eventList1) {
+        System.out.println(event1);
+    }
+
+    
+    //Bulk intialization
+    
+    
+    ArrayList<EventBooking> eventList2 =
+            new ArrayList<>(Arrays.asList(event));
+
+    System.out.println("\n========== BULK ARRAYLIST ==========");
+
+    for (EventBooking event2 : eventList2) {
+        System.out.println(event2);
+    }
+    
+    
+    EventBooking[] newArray=eventList2.toArray(new EventBooking[0]);
+    
+    
+    System.out.println("\n========== ARRAYLIST BACK TO ARRAY ==========");
+
+    for (EventBooking event3 : newArray) {
+        System.out.println(event3);
+    }
+    
+    //Take and calculate tax
+    
+    eventList2.forEach(event6 -> {
+
+        double bookingCost = event6.getBookingCost();
+        double offer = event6.getOffer();
+
+        // Offer is subtracted before tax calculation
+        if(event6.)
+        double taxableAmount = bookingCost - offer;
+
+        double taxPercentage = 0;
+
+        if (bookingCost > 2000 && bookingCost <= 5000) {
+
+            taxPercentage = 10;
+
+        } else if (bookingCost > 5000 && bookingCost <= 10000) {
+
+            taxPercentage = 15;
+
+        } else if (bookingCost > 10000 && bookingCost <= 30000) {
+
+            taxPercentage = 20;
+        }
+
+        // Calculate tax
+        double tax = taxableAmount * taxPercentage / 100;
+
+        // Calculate final total
+        double totalCost = taxableAmount + tax;
+
+        // Update object
+        event6.setTax(tax);
+        event6.setTotalCost(totalCost);
+
+        System.out.println("--------------------------------");
+
+        System.out.println("Event Name    : " + event6.getEventName());
+        System.out.println("Booking Cost  : ₹" + event6.getBookingCost());
+        System.out.println("Offer Amount  : ₹" + event6.getOffer());
+        System.out.println("Tax Amount    : ₹" + event6.getTax());
+        System.out.println("Total Price   : ₹" + event6.getTotalCost());
+    });
+     //sum of bookingcosts
+    double sumOfBookingCosts = eventList2
+            .stream()
+            .mapToDouble(EventBooking::getBookingCost)
+            .sum();
+
+    System.out.println("\n======================================");
+    System.out.println("Sum of Booking Costs : ₹" + sumOfBookingCosts);
+    
+    
+    // Grand Total including tax after offers
+   
+    double grandTotal = eventList2
+            .stream()
+            .mapToDouble(EventBooking::getTotalCost)
+            .sum();
+
+    System.out.println("Grand Total          : ₹" + grandTotal);
+    
+    
+    
+ // Highest Booking Cost Event
+    // =========================================================
+
+    EventBooking highestBooking =
+            eventList2
+                    .stream()
+                    .max((event1, event2) ->
+                            Double.compare(
+                                    event1.getBookingCost(),
+                                    event2.getBookingCost()
+                            ))
+                    .get();
+
+   
+    System.out.println("Highest Booking Cost Event");
+    System.out.println("Event Name : " +
+            highestBooking.getEventName());
+    System.out.println("Booking Cost : ₹" +
+            highestBooking.getBookingCost());
+
+
+    // =========================================================
+    // Stream API
+    // Events between ₹7,000 and ₹9,000
+    // =========================================================
+
+    System.out.println("\n======================================");
+    System.out.println("Events Between ₹7,000 and ₹9,000");
+
+    eventList2
+            .stream()
+            .filter(event4 ->
+                    event4.getBookingCost() >= 7000 &&
+                    event4.getBookingCost() <= 9000
+            )
+            .forEach(event5-> {
+
+                System.out.println("--------------------------------");
+                System.out.println("Event Name     : " +
+                        event5.getEventName());
+
+                System.out.println("Location       : " +
+                        event5.getEventLocation());
+
+                System.out.println("Booking Date   : " +
+                        event5.getBookingDate());
+
+                System.out.println("Booking Cost   : ₹" +
+                        event5.getBookingCost());
+
+                System.out.println("Offer          : ₹" +
+                        event5.getOffer());
+
+                System.out.println("Tax            : ₹" +
+                        event5.getTax());
+
+                System.out.println("Total Cost     : ₹" +
+                        event5.getTotalCost());
+            });
+}
+
+
+}
