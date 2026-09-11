@@ -1,0 +1,35 @@
+package com.example.demo.dao;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Repository;
+
+import com.example.demo.Entity.User;
+import com.example.demo.repository.UserRepository;
+
+@Repository
+public class UserDao {
+
+	private final UserRepository userRepository;
+
+	UserDao(UserRepository userRepository) {
+		this.userRepository = userRepository;
+	}
+
+	public List<User> getAllUser() {
+		
+		return userRepository.findAll();
+	}
+
+	public User register(Optional<User> user) {
+		
+		return userRepository.save(user);
+	}
+	
+	public boolean existsByEmail(String email) {
+		return userRepository.existsByEmail(email);
+	}
+
+	
+}
