@@ -1,4 +1,4 @@
-package app.service.Impl;
+package app.service.impl;
 
 import java.util.List;
 
@@ -41,6 +41,8 @@ public class UserServiceImpl implements UserService {
     
     @Autowired
     private EventFilterMapper  eventFilterMapper;
+    
+   
 
     @Override
     public List<Event> getAllEvents(
@@ -182,6 +184,24 @@ public class UserServiceImpl implements UserService {
                 role,
                 status
         );
+    }
+
+    @Override
+    public List<EventFilterResponse> getFilteredEvents(
+            EvenFilterRequest filter) {
+
+       
+        List<Event> events = userDao.getActiveEvents();
+
+        
+        List<Event> filteredEvents =
+                eventFilterMapper.filter(events, filter);
+
+        
+        List<EventFilterResponse> response =eventFilterResponse.response(filteredEvents);
+                
+       
+        return response;
     }
     
 }

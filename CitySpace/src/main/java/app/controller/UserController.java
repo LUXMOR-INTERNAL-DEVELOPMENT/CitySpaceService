@@ -19,7 +19,8 @@ import app.dto.EventFilterResponse;
 import app.dto.EventResponse;
 import app.dto.StatusUpdate;
 import app.dto.UserUpdateProfileRequest;
-import app.Impl.UserServiceImpl;
+import app.service.impl.UserServiceImpl;
+
 
 @RestController
 @RequestMapping("/api/user")
