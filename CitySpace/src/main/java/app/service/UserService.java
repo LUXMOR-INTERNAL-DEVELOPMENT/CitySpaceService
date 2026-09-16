@@ -2,8 +2,6 @@ package app.service;
 
 import java.util.List;
 
-
-
 import app.Entity.Event;
 import app.dto.EvenFilterRequest;
 import app.dto.EventFilterResponse;
@@ -47,6 +45,6 @@ public interface UserService {
             String user_id,
             String role,
             StatusUpdate status);
-    
+
     List<EventFilterResponse> getFilteredEvents(EvenFilterRequest filter);
 }

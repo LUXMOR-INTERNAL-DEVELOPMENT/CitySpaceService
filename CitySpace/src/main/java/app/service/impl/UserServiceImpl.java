@@ -190,18 +190,17 @@ public class UserServiceImpl implements UserService {
     public List<EventFilterResponse> getFilteredEvents(
             EvenFilterRequest filter) {
 
-       
+
         List<Event> events = userDao.getActiveEvents();
 
-        
+
         List<Event> filteredEvents =
                 eventFilterMapper.filter(events, filter);
 
-        
+
         List<EventFilterResponse> response =eventFilterResponse.response(filteredEvents);
-                
-       
+
+
         return response;
     }
-    
 }

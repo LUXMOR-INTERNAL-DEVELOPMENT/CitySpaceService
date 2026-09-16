@@ -11,21 +11,21 @@ public class UserExceptionHandler {
 	@ExceptionHandler(value=EventNotAvailableException.class)
 	public ResponseEntity<?>eventNotFoundException(EventNotAvailableException e){
 		return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
-		
+
 	}
-	
-	
+
+
 	@ExceptionHandler(value=UserIdNotFoundException.class)
 	public ResponseEntity<?>userIdNotFoundException(UserIdNotFoundException e){
 		return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
-		
+
 	}
-	
+
 	@ExceptionHandler(value=AccessDeniedException.class)
 	public ResponseEntity<?>userIdNotFoundException(AccessDeniedException e){
 		return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
-		
+
 	}
-	
-	
+
+
 }
