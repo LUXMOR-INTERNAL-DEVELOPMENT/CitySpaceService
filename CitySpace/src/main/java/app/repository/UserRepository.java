@@ -59,17 +59,19 @@ public class UserRepository {
 	        );
 	    }
 
-	   public int updateUser(User user) {
-		   return jdbcTemplate.update(updateUserQuery,
-				    user.getUserName(),
-			        user.getEmail(),
-			        user.getPhoneno(),
-			        user.getPassword(),
-			        user.getUpdatedBy(),
-			        user.getUserId()
-		   );
-	   }
-	   
+	    public int updateUser(User user) {
+
+	        return jdbcTemplate.update(updateUserQuery,
+	                user.getUserName(),       
+	                user.getEmail(),          
+	                user.getPhoneno(),        
+	                user.getPassword(),      
+	                user.getUserLocation(),   
+	                user.getUpdatedBy(),      
+	                user.getUserId()         
+	        );
+	    }
+
 	   public int updateUserStatus(User user) {
 
 		    return jdbcTemplate.update(
