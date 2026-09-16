@@ -19,6 +19,7 @@ public class User {
 	private String userName;
 	private String email;
 	private String password;
+	private String userLocation;
 	private Long phoneno;
 	private String status;
 	private LocalDateTime createdAt;

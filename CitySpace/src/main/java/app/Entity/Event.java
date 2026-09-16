@@ -21,6 +21,7 @@ public class Event {
 	@Column(name="event_id")
 	private String eventId;
 	private String vendorId;
+	private String userId;
 	private String eventName; 
 	private String eventDate; 
 	private String eventLocation; 

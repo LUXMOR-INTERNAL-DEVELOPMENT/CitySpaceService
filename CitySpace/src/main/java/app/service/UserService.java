@@ -1,17 +1,19 @@
-package app.dao;
+package app.service;
 
 import java.util.List;
 
-import org.springframework.stereotype.Repository;
+
 
 import app.Entity.Event;
-import app.Entity.User;
 import app.dto.EvenFilterRequest;
+import app.dto.EventFilterResponse;
+import app.dto.EventResponse;
 import app.dto.StatusUpdate;
+import app.dto.UserResponse;
 import app.dto.UserUpdateProfileRequest;
 
 
-public interface UserDao {
+public interface UserService {
 
     List<Event> getAllEvents(
             String userId,
@@ -20,33 +22,31 @@ public interface UserDao {
             String location,
             double radius);
 
-    List<Event> TopPopularityEvent(
+    List<EventResponse> TopPopularityEvents(
             String userId,
             Double latitude,
             Double longitude,
             String location,
             double radius);
 
-    List<Event> weekEndEvents(
+    List<EventResponse> weekEndEvents(
             String userId,
             Double latitude,
             Double longitude,
             String location,
             double radius);
 
-    User getUser(String user_id);
+    UserResponse getUser(String user_id);
 
     String updateProfileById(
             String user_id,
             String role,
-            UserUpdateProfileRequest dto);
+            UserUpdateProfileRequest userProfile);
 
     String updateStatus(
             String user_id,
             String role,
             StatusUpdate status);
     
-    List<Event> getActiveEvents();
-
-    
+    List<EventFilterResponse> getFilteredEvents(EvenFilterRequest filter);
 }

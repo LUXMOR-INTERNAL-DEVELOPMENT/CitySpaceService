@@ -1,11 +1,15 @@
 package app.repository;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import app.Entity.Event;
 import app.Entity.User;
+import app.mapper.EventRowMapper;
 import app.mapper.UserRowMapper;
 
 @Repository
@@ -13,7 +17,11 @@ public class UserRepository {
 	
         @Autowired
 	    private  JdbcTemplate jdbcTemplate;
-
+        
+        @Value("${event.getActiveEvents}")
+	    private String getActiveEventsQuery;
+        
+        
 	    @Value("${user.getUserById}")
 	    private String getUserByIdQuery;
 
@@ -27,6 +35,21 @@ public class UserRepository {
 	    @Autowired
 	    private UserRowMapper userRowMapper;
 	    
+	    
+
+	    @Autowired
+	    private EventRowMapper eventRowMapper;
+
+
+	    public List<Event> getActiveEvents() {
+
+	        return jdbcTemplate.query(
+	                getActiveEventsQuery,
+	                eventRowMapper
+	        );
+	    }
+	    
+	   
 	    public User getUserById(String user_id) {
 
 	        return jdbcTemplate.queryForObject(
@@ -55,5 +78,7 @@ public class UserRepository {
 		        user.getUserId()
 		    );
 		}
+	   
+	   
 	}
 
