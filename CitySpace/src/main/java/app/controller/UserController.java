@@ -150,4 +150,23 @@ public class UserController {
 
         return ResponseEntity.ok(events);
     }
+	
+	@GetMapping("/list/search")
+    public ResponseEntity<List<Event>> searchEvents(
+            @RequestParam String keyword) {
+
+        return ResponseEntity.ok(
+                userService.searchEvents(keyword)
+        );
+    }
+
+    @GetMapping("/list/searchdetail")
+    public ResponseEntity<List<Event>> searchEventDetails(
+            @RequestParam String keyword) {
+
+        return ResponseEntity.ok(
+                userService.searchEventDetails(keyword)
+        );
+    }
+
 }

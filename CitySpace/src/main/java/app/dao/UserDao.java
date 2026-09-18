@@ -2,51 +2,13 @@ package app.dao;
 
 import java.util.List;
 
-import org.springframework.stereotype.Repository;
-
-import app.Entity.Event;
-import app.Entity.User;
-import app.dto.EvenFilterRequest;
-import app.dto.StatusUpdate;
-import app.dto.UserUpdateProfileRequest;
-
+import app.entity.User;
 
 public interface UserDao {
 
-    List<Event> getAllEvents(
-            String userId,
-            Double latitude,
-            Double longitude,
-            String location,
-            double radius);
+    List<User> getAllUsers();
 
-    List<Event> TopPopularityEvent(
-            String userId,
-            Double latitude,
-            Double longitude,
-            String location,
-            double radius);
+    User getUserById(String id);
 
-    List<Event> weekEndEvents(
-            String userId,
-            Double latitude,
-            Double longitude,
-            String location,
-            double radius);
-
-    User getUser(String user_id);
-
-    String updateProfileById(
-            String user_id,
-            String role,
-            UserUpdateProfileRequest dto);
-
-    String updateStatus(
-            String user_id,
-            String role,
-            StatusUpdate status);
-    
-    List<Event> getActiveEvents();
-
-    
 }
+
