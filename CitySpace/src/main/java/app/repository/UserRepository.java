@@ -1,14 +1,38 @@
-package app.Repository;
+package app.repository;
 
-import java.util.Optional;
+import java.util.List;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
-import api.entity.Userimpl;
+import app.entity.User;
+import app.mapper.UserRowMapper;
 
-public interface UserRepository extends JpaRepository<Userimpl, Long> {
+@Repository
+public class UserRepository {
 
-    Optional<Userimpl> findByAuthId(Long authId);
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
-    Optional<Userimpl> findByUserId(String userId);
+    @Autowired
+    private UserRowMapper userRowMapper;
+
+    @Value("${admin.users.getAll}")
+    private String getAllUsersQuery;
+
+    // Get All Users
+    public List<User> getAllUsers() {
+
+        return jdbcTemplate.query(
+                getAllUsersQuery,
+                userRowMapper
+        );
+    }
+
+	public User getById(String id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

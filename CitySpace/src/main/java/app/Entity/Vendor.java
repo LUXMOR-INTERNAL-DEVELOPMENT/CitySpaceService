@@ -1,15 +1,34 @@
-package api.entity;
+package app.entity;
 
-import java.time.LocalDateTime;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
+@Entity
+@Table(name = "vendors")
 public class Vendor {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String vendorId;
-    private Long authId;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private String updatedBy;
+
+    @Column(name = "vendor_name")
+    private String vendorName;
+
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "phone")
+    private String phone;
+
+    @Column(name = "approved")
+    private boolean approved;
+
+    public Vendor() {
+    }
 
     public Long getId() {
         return id;
@@ -19,43 +38,35 @@ public class Vendor {
         this.id = id;
     }
 
-    public String getVendorId() {
-        return vendorId;
+    public String getVendorName() {
+        return vendorName;
     }
 
-    public void setVendorId(String vendorId) {
-        this.vendorId = vendorId;
+    public void setVendorName(String vendorName) {
+        this.vendorName = vendorName;
     }
 
-    public Long getAuthId() {
-        return authId;
+    public String getEmail() {
+        return email;
     }
 
-    public void setAuthId(Long authId) {
-        this.authId = authId;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
+    public boolean isApproved() {
+        return approved;
     }
 
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public String getUpdatedBy() {
-        return updatedBy;
-    }
-
-    public void setUpdatedBy(String updatedBy) {
-        this.updatedBy = updatedBy;
+    public void setApproved(boolean approved) {
+        this.approved = approved;
     }
 }

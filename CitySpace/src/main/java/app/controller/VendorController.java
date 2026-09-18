@@ -1,25 +1,42 @@
-package api.Controller;
+package app.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import api.Service.VendorService;
-import api.entity.Vendor;
+import app.entity.Vendor;
+import app.repository.VendorRepository;
 
 @RestController
-@RequestMapping("/api/vendors")
+@RequestMapping("/api/vendor")
 public class VendorController {
 
-    private final VendorService vendorService;
+    @Autowired
+    private VendorRepository vendorRepository;
 
-    public VendorController(VendorService vendorService) {
-        this.vendorService = vendorService;
+    // Get Vendor By ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Vendor> getVendorById(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                vendorRepository.getById(id)
+        );
     }
 
-    @GetMapping("/{vendorId}")
-    public Vendor getVendorById(@PathVariable String vendorId) {
-        return vendorService.getVendorById(vendorId);
+    // Approve Vendor
+    @PutMapping("/approve/{id}")
+    public ResponseEntity<Vendor> approveVendor(
+            @PathVariable Long id) {
+
+        vendorRepository.approveVendor(id);
+
+        return ResponseEntity.ok(
+                vendorRepository.getById(id)
+        );
     }
 }

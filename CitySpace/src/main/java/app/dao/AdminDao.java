@@ -1,6 +1,5 @@
-package api.Dao;
+package app.dao;
 
 public interface AdminDao {
 
-    String approveVendor(String vendorId);
 }

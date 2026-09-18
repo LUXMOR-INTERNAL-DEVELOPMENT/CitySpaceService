@@ -1,8 +1,5 @@
-package app.Service;
-
-import app.entity.Vendor;
+package app.service;
 
 public interface VendorService {
 
-    Vendor getVendorById(String vendorId);
 }
