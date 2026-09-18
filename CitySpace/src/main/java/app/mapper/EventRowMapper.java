@@ -1,17 +1,13 @@
 package app.mapper;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Base64;
 
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
-import app.Entity.Event;
+import app.entity.Event;
 
-
-
-
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 @Component
 public class EventRowMapper implements RowMapper<Event> {
@@ -22,41 +18,38 @@ public class EventRowMapper implements RowMapper<Event> {
         Event event = new Event();
 
         event.setEventId(rs.getString("event_id"));
-
         event.setVendorId(rs.getString("vendor_id"));
-        
-        event.setUserId(rs.getString("user_id"));
 
-        event.setEventDate(rs.getString("event_date"));
-
-        event.setEventName(rs.getString("event_name"));
-
+        // Category
         event.setCategoryId(rs.getString("category_id"));
+        event.setCategoryName(rs.getString("category_name"));
 
-        if (rs.getBytes("event_image") != null) {
-            event.setEventImage(
-                Base64.getEncoder().encodeToString(
-                    rs.getBytes("event_image")
-                )
+        // Event Details
+        event.setEventName(rs.getString("event_name"));
+        event.setEventDescription(rs.getString("event_description"));
+
+        // Event Date - Entity uses LocalDate
+        if (rs.getDate("event_date") != null) {
+            event.setEventDate(
+                rs.getDate("event_date").toLocalDate()
             );
         }
 
+        // Location
         event.setEventLocation(rs.getString("event_location"));
+        event.setLatitude(rs.getBigDecimal("latitude"));
+        event.setLongitude(rs.getBigDecimal("longitude"));
 
-        event.setEventDescription(rs.getString("event_description"));
-
-        event.setEventStatus(rs.getString("event_status"));
-
-        event.setRating(rs.getDouble("rating"));
-
+        // Price
         event.setEventPrice(rs.getBigDecimal("event_price"));
 
-        event.setLatitude(rs.getDouble("latitude"));
+        // Image
+        event.setEventImage(rs.getString("event_image"));
 
-        event.setLongitude(rs.getDouble("longitude"));
+        // Status
+        event.setStatus(rs.getString("status"));
 
-        event.setCategoryName(rs.getString("category_name"));
-
+        // Audit - Entity uses LocalDateTime
         if (rs.getTimestamp("created_at") != null) {
             event.setCreatedAt(
                 rs.getTimestamp("created_at").toLocalDateTime()

@@ -1,61 +1,37 @@
-package api.Dao;
+package app.dao;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import api.entity.Vendor;
+import app.entity.Vendor;
+import app.repository.VendorRepository;
 
 @Repository
-public class VendorDaoimpl implements VendorDao {
+public class VendorDaoImpl implements VendorDao {
 
-    private final JdbcTemplate jdbcTemplate;
-
-    @Value("${vendor.getVendorById}")
-    private String getVendorByIdQuery;
-
-    public VendorDaoimpl(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    @Autowired
+    private VendorRepository vendorRepository;
 
     @Override
     public Vendor getVendorById(String vendorId) {
+        return vendorRepository.getById(vendorId);
+    }
 
-        List<Vendor> vendors = jdbcTemplate.query(
-                getVendorByIdQuery,
-                (rs, rowNum) -> {
+    @Override
+    public int updateVendor(Vendor vendor) {
+        return vendorRepository.update(vendor);
+    }
 
-                    Vendor vendor = new Vendor();
-
-                    vendor.setId(rs.getLong("id"));
-                    vendor.setVendorId(rs.getString("vendor_id"));
-                    vendor.setAuthId(rs.getLong("auth_id"));
-
-                    if (rs.getTimestamp("created_at") != null) {
-                        vendor.setCreatedAt(
-                                rs.getTimestamp("created_at").toLocalDateTime()
-                        );
-                    }
-
-                    if (rs.getTimestamp("updated_at") != null) {
-                        vendor.setUpdatedAt(
-                                rs.getTimestamp("updated_at").toLocalDateTime()
-                        );
-                    }
-
-                    vendor.setUpdatedBy(rs.getString("updated_by"));
-
-                    return vendor;
-                },
-                vendorId
+    @Override
+    public int deactivateVendor(String vendorId, String updatedBy) {
+        return vendorRepository.deactivate(
+                vendorId,
+                updatedBy
         );
+    }
 
-        if (vendors.isEmpty()) {
-            return null;
-        }
-
-        return vendors.get(0);
+    @Override
+    public boolean existsById(String vendorId) {
+        return vendorRepository.existsById(vendorId);
     }
 }
