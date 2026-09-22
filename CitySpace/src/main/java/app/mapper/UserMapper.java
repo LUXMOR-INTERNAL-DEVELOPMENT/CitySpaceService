@@ -2,8 +2,9 @@ package app.mapper;
 
 import org.springframework.stereotype.Component;
 
-import app.Entity.User;
+
 import app.dto.UserUpdateProfileRequest;
+import app.entity.User;
 
 
 

@@ -4,8 +4,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import app.Entity.Event;
+
 import app.dto.EvenFilterRequest;
+import app.entity.Event;
 
 @Component
 public class EventFilterMapper {

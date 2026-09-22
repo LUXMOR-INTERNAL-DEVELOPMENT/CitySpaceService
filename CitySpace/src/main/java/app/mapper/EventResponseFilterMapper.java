@@ -4,13 +4,14 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import app.Entity.Event;
+
 import app.dto.EventFilterResponse;
+import app.entity.Event;
 
 @Component
 public class EventResponseFilterMapper {
-   
-	
+
+
 	public List<EventFilterResponse>response(List<Event> events){
 		return events.stream()
 		        .map(event -> new EventFilterResponse(

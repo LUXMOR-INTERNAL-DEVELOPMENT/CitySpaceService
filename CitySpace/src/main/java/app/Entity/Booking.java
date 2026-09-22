@@ -1,79 +1,38 @@
-package api.entity;
+package app.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
+
+@Data
+@Entity
+@Table(name = "booking")
 public class Booking {
 
+    @Id
+    @Column(name = "booking_id")
     private String bookingId;
+
     private String userId;
+    private String Id;
     private String vendorId;
-    private String eventId;
-    private LocalDateTime bookingDate;
-    private int numberOfTickets;
-    private double amount;
-    private String status;
 
-    public String getBookingId() {
-        return bookingId;
-    }
+    private String bookingDate;
+    private String slotId;
 
-    public void setBookingId(String bookingId) {
-        this.bookingId = bookingId;
-    }
+    private int numberOfGuests;
 
-    public String getUserId() {
-        return userId;
-    }
+    private BigDecimal totalAmount;
+    private String bookingStatus;
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
+    private LocalDateTime createdAt;
+    private String createdBy;
 
-    public String getVendorId() {
-        return vendorId;
-    }
-
-    public void setVendorId(String vendorId) {
-        this.vendorId = vendorId;
-    }
-
-    public String getEventId() {
-        return eventId;
-    }
-
-    public void setEventId(String eventId) {
-        this.eventId = eventId;
-    }
-
-    public LocalDateTime getBookingDate() {
-        return bookingDate;
-    }
-
-    public void setBookingDate(LocalDateTime bookingDate) {
-        this.bookingDate = bookingDate;
-    }
-
-    public int getNumberOfTickets() {
-        return numberOfTickets;
-    }
-
-    public void setNumberOfTickets(int numberOfTickets) {
-        this.numberOfTickets = numberOfTickets;
-    }
-
-    public double getAmount() {
-        return amount;
-    }
-
-    public void setAmount(double amount) {
-        this.amount = amount;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
+    private LocalDateTime updatedAt;
+    private String updatedBy;
 }

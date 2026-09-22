@@ -2,8 +2,9 @@ package app.mapper;
 
 import org.springframework.stereotype.Component;
 
-import app.Entity.User;
+
 import app.dto.UserResponse;
+import app.entity.User;
 
 
 

@@ -16,24 +16,61 @@ public class UserRowMapper implements RowMapper<User> {
 
         User user = new User();
 
-        user.setId(rs.getString("id"));
-        user.setStatus(rs.getString("status"));
-
-        user.setCreatedAt(
-                rs.getTimestamp("created_at") != null
-                        ? rs.getTimestamp("created_at").toLocalDateTime()
-                        : null
+        user.setUserId(
+                rs.getString("user_id")
         );
 
-        user.setCreatedBy(rs.getString("created_by"));
-
-        user.setUpdatedAt(
-                rs.getTimestamp("updated_at") != null
-                        ? rs.getTimestamp("updated_at").toLocalDateTime()
-                        : null
+        user.setUserName(
+                rs.getString("user_name")
         );
 
-        user.setUpdatedBy(rs.getString("updated_by"));
+        user.setEmail(
+                rs.getString("email")
+        );
+
+        user.setPassword(
+                rs.getString("password")
+        );
+
+        user.setUserLocation(
+                rs.getString("user_location")
+        );
+
+        user.setPhoneno(
+                rs.getLong("phoneno")
+        );
+
+        user.setStatus(
+                rs.getString("status")
+        );
+
+        user.setRole(
+                rs.getString("role")
+        );
+
+        if (rs.getTimestamp("created_at") != null) {
+
+            user.setCreatedAt(
+                    rs.getTimestamp("created_at")
+                            .toLocalDateTime()
+            );
+        }
+
+        user.setCreatedBy(
+                rs.getString("created_by")
+        );
+
+        if (rs.getTimestamp("updated_at") != null) {
+
+            user.setUpdatedAt(
+                    rs.getTimestamp("updated_at")
+                            .toLocalDateTime()
+            );
+        }
+
+        user.setUpdatedBy(
+                rs.getString("updated_by")
+        );
 
         return user;
     }

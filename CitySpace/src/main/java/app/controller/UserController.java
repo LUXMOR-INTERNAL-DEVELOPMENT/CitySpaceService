@@ -7,19 +7,24 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import app.Entity.Event;
+import app.dto.DiningBookingRequest;
+import app.dto.DiningBookingResponse;
+import app.dto.DiningEventResponse;
 import app.dto.EvenFilterRequest;
 import app.dto.EventFilterResponse;
 import app.dto.EventResponse;
 import app.dto.StatusUpdate;
 import app.dto.UserUpdateProfileRequest;
+import app.entity.Event;
 import app.service.impl.UserServiceImpl;
+
 
 
 
@@ -35,7 +40,7 @@ public class UserController {
             @RequestParam(required=false) String userId,
             @RequestParam(required = false) Double latitude,
             @RequestParam(required = false) Double longitude,
-            @RequestParam(required = false) String location,
+            @RequestParam(required = false,defaultValue = "Chennai") String location,
             @RequestParam(defaultValue = "10") double radius) {
 
         List<Event> event =
@@ -58,7 +63,7 @@ public class UserController {
             @RequestParam String userId,
             @RequestParam(required = false) Double latitude,
             @RequestParam(required = false) Double longitude,
-            @RequestParam(required = false) String location,
+            @RequestParam(required = false,defaultValue = "Chennai")  String location,
             @RequestParam(defaultValue = "10") double radius) {
 
         List<EventResponse> event =
@@ -81,7 +86,7 @@ public class UserController {
             @RequestParam String userId,
             @RequestParam(required = false) Double latitude,
             @RequestParam(required = false) Double longitude,
-            @RequestParam(required = false) String location,
+            @RequestParam(required = false,defaultValue = "Chennai") String location,
             @RequestParam(defaultValue = "10") double radius) {
 
         List<EventResponse> event =
@@ -140,7 +145,7 @@ public class UserController {
                 HttpStatus.OK
         );
     }
-    
+
     @GetMapping("/filter/events")
     public ResponseEntity<?> getFilteredEvents(
             @RequestBody EvenFilterRequest filter) {
@@ -150,23 +155,50 @@ public class UserController {
 
         return ResponseEntity.ok(events);
     }
-	
-	@GetMapping("/list/search")
-    public ResponseEntity<List<Event>> searchEvents(
-            @RequestParam String keyword) {
+    
+    @GetMapping("/list/category/{categoryId}")
+    public ResponseEntity<?> getEventsByCategory(
 
-        return ResponseEntity.ok(
-                userService.searchEvents(keyword)
+            @PathVariable String categoryId,
+
+            @RequestParam String userId,
+
+            @RequestParam(required = false) Double latitude,
+
+            @RequestParam(required = false) Double longitude,
+
+            @RequestParam(required = false, defaultValue = "Chennai") String location,
+
+            @RequestParam(defaultValue = "10") double radius) {
+
+        List<EventResponse> events = userService.getEventsByCategory(
+                categoryId,
+                userId,
+                latitude,
+                longitude,
+                location,
+                radius
         );
+
+        return ResponseEntity.ok(events);
     }
+    
+    @GetMapping("/diningevent/{Id}")
+    public ResponseEntity<?> getDiningEvent(@PathVariable String Id) {
 
-    @GetMapping("/list/searchdetail")
-    public ResponseEntity<List<Event>> searchEventDetails(
-            @RequestParam String keyword) {
+        DiningEventResponse event=userService.getDiningEvent(Id);
 
-        return ResponseEntity.ok(
-                userService.searchEventDetails(keyword)
-        );
+        return ResponseEntity.ok(event);
     }
+    
+    @PostMapping("/booking/dining")
+    
+    public ResponseEntity<?> bookingDining(@RequestParam String userId,
+            @RequestParam String Id,@RequestBody DiningBookingRequest request) {
 
+        DiningBookingResponse response =userService.bookingDining(userId,Id,request);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+    
 }

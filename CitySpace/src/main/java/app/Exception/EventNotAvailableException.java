@@ -1,4 +1,4 @@
-package app.Exception;
+package app.exception;
 
 public class EventNotAvailableException extends RuntimeException {
 

@@ -8,7 +8,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import app.Entity.Event;
+import app.entity.Event;
 
 @Component
 public class GetPopularityEvents {
