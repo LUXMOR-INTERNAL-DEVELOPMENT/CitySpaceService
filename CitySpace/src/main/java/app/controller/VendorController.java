@@ -10,8 +10,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import app.Service.VendorServiceimpl;
 import app.entity.Vendor;
-import app.service.VendorServiceImpl;
+
 
 
 @RestController
@@ -19,7 +20,7 @@ import app.service.VendorServiceImpl;
 public class VendorController {
     
 	@Autowired
-    private  VendorServiceImpl vendorService;
+    private  VendorServiceimpl vendorService;
 
    
 

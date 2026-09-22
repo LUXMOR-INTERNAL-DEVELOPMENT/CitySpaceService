@@ -1,8 +1,10 @@
-package app.Service;
+package app.service.impl;
 
 import org.springframework.stereotype.Service;
 
-import app.Dao.AdminDao;
+import app.dao.AdminDao;
+
+
 
 @Service
 public class AdminServiceimpl implements AdminService {

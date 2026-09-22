@@ -1,4 +1,4 @@
-package api.entity;
+package app.entity;
 
 public class Auth {
 

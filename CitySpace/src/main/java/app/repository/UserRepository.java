@@ -7,14 +7,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import app.Entity.Booking;
-import app.Entity.Event;
-import app.Entity.Payment;
-import app.Entity.Restaurant;
-import app.Entity.TimeSlot;
-import app.Entity.User;
+
 import app.dto.AvailableTable;
 import app.dto.BookingTableAllocation;
+import app.entity.Booking;
+import app.entity.Event;
+import app.entity.Payment;
+import app.entity.Restaurant;
+import app.entity.TimeSlot;
+import app.entity.User;
 import app.mapper.AvailableTableRowMapper;
 import app.mapper.EventRowMapper;
 import app.mapper.RestaurantRowMapper;

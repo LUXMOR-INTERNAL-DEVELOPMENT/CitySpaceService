@@ -14,24 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
-import app.Entity.Booking;
 
-import app.Entity.Event;
-import app.Entity.Payment;
-import app.Entity.Restaurant;
-import app.Entity.TimeSlot;
-import app.Entity.User;
-
-import app.Exception.AccessDeniedException;
-
-import app.Exception.EventNotAvailableException;
-import app.Exception.InvalidBookingDateException;
-import app.Exception.InvalidGuestCountException;
-import app.Exception.SlotExpiredException;
-import app.Exception.SlotNotAvailableException;
-import app.Exception.TableNotAvailableException;
-import app.Exception.UserIdNotFoundException;
-import app.Exception.VendorNotAvailableException;
 import app.dao.impl.UserDaoImpl;
 import app.dto.AvailableTable;
 import app.dto.BookingTableAllocation;
@@ -44,6 +27,21 @@ import app.dto.EventResponse;
 import app.dto.StatusUpdate;
 import app.dto.UserResponse;
 import app.dto.UserUpdateProfileRequest;
+import app.entity.Booking;
+import app.entity.Event;
+import app.entity.Payment;
+import app.entity.Restaurant;
+import app.entity.TimeSlot;
+import app.entity.User;
+import app.exception.AccessDeniedException;
+import app.exception.EventNotAvailableException;
+import app.exception.InvalidBookingDateException;
+import app.exception.InvalidGuestCountException;
+import app.exception.SlotExpiredException;
+import app.exception.SlotNotAvailableException;
+import app.exception.TableNotAvailableException;
+import app.exception.UserIdNotFoundException;
+import app.exception.VendorNotAvailableException;
 import app.mapper.DiningBookingResponseMapper;
 import app.mapper.DiningEventResponseMapper;
 import app.mapper.EventFilterMapper;

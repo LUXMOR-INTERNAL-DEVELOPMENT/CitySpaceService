@@ -2,7 +2,7 @@ package app.service;
 
 import java.util.List;
 
-import app.Entity.Event;
+
 import app.dto.DiningBookingRequest;
 import app.dto.DiningBookingResponse;
 import app.dto.DiningEventResponse;
@@ -12,6 +12,7 @@ import app.dto.EventResponse;
 import app.dto.StatusUpdate;
 import app.dto.UserResponse;
 import app.dto.UserUpdateProfileRequest;
+import app.entity.Event;
 
 
 public interface UserService {
