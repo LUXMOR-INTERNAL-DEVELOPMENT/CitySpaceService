@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
-
 import app.dao.impl.UserDaoImpl;
 import app.dto.AvailableTable;
 import app.dto.BookingTableAllocation;
@@ -51,6 +50,7 @@ import app.mapper.UserResponseMapper;
 import app.service.UserService;
 import app.util.GetNearByEvents;
 import jakarta.transaction.Transactional;
+
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -131,6 +131,7 @@ public class UserServiceImpl implements UserService {
 
         return response;
     }
+    
 
     @Override
     public List<EventResponse> weekEndEvents(
@@ -280,81 +281,106 @@ public class UserServiceImpl implements UserService {
             DiningBookingRequest request) {
 
         // 1. Validate number of guests
+
         if (request.getNumberOfGuests() <= 0) {
+
             throw new InvalidGuestCountException(
                     "Number of guests must be greater than 0");
         }
 
-        int numberOfGuests = request.getNumberOfGuests();
+        int numberOfGuests =
+                request.getNumberOfGuests();
 
-        //Get user
-        User user = userDao.getUser(userId);
 
-        //Get dining event
-        Event event = userDao.getDiningEvent(eventId);
+        // 2. Get user
 
-        //Validate vendor
-        if (event == null || event.getVendorId() == null) {
+        User user =
+                userDao.getUser(userId);
+
+
+        // 3. Get dining event
+
+        Event event =
+                userDao.getDiningEvent(eventId);
+
+
+        // 4. Validate vendor
+
+        if (event == null ||
+                event.getVendorId() == null) {
+
             throw new VendorNotAvailableException(
                     "Vendor is not available for this dining event");
         }
 
+
         // 5. Get active slot
-        TimeSlot slot = userDao.getActiveSlot(
-                request.getSlotId(),
-                event.getVendorId());
+
+        TimeSlot slot =
+                userDao.getActiveSlot(
+                        request.getSlotId(),
+                        event.getVendorId());
 
         if (slot == null) {
+
             throw new SlotNotAvailableException(
                     "Selected time slot is not available");
         }
 
+
         // 6. Validate booking date
+
         LocalDate bookingDate =
-                LocalDate.parse(request.getBookingDate());
+                LocalDate.parse(
+                        request.getBookingDate());
 
         LocalDate today =
                 LocalDate.now();
 
+
         if (bookingDate.isBefore(today)) {
+
             throw new InvalidBookingDateException(
                     "Booking date cannot be in the past");
         }
 
-        // 7. If booking is today, check slot expiry
+
+        // 7. If booking is today,
+        //    check whether slot has expired
+
         if (bookingDate.equals(today)) {
 
             LocalTime currentTime =
                     LocalTime.now();
 
             LocalTime slotEndTime =
-                    LocalTime.parse(slot.getSlotEndTime());
+                    LocalTime.parse(
+                            slot.getSlotEndTime());
 
             if (!currentTime.isBefore(slotEndTime)) {
+
                 throw new SlotExpiredException(
                         "Selected time slot has already ended");
             }
         }
 
-        // 8. LOCK RESTAURANT TABLES
-        //
-        // This prevents two users from allocating
-        // the same tables at the same time.
+
+        // 8. Lock restaurant tables
+
         List<Restaurant> tables =
                 userDao.getTablesForUpdate(
                         event.getVendorId());
 
-        if (tables == null || tables.isEmpty()) {
+        if (tables == null ||
+                tables.isEmpty()) {
+
             throw new TableNotAvailableException(
                     "No tables are available for this vendor");
         }
 
-        // 9. GET TABLES AVAILABLE FOR THIS
-        //    DATE + SLOT
-        //
-        // A table is completely unavailable if another
-        // booking already has that table for this
-        // date and slot.
+
+        // 9. Get tables available for
+        //    selected date + slot
 
         List<AvailableTable> availableTables =
                 userDao.getAvailableTables(
@@ -370,17 +396,22 @@ public class UserServiceImpl implements UserService {
                     + "date and time slot");
         }
 
-        // 10. Calculate total capacity of available
-        //     WHOLE tables
+
+        // 10. Calculate total capacity
+
         int totalCapacity = 0;
 
-        for (AvailableTable table : availableTables) {
+        for (AvailableTable table :
+                availableTables) {
 
-            totalCapacity += table.getCapacity();
+            totalCapacity +=
+                    table.getCapacity();
         }
 
-        // 11. Check whether enough WHOLE table capacity
+
+        // 11. Check whether enough capacity
         //     is available
+
         if (totalCapacity < numberOfGuests) {
 
             throw new TableNotAvailableException(
@@ -388,7 +419,8 @@ public class UserServiceImpl implements UserService {
                     + "for the selected date and time slot");
         }
 
-        // 12. CALCULATE AMOUNT
+
+        // 12. Calculate amount
 
         BigDecimal bookingAmount =
                 request.getBaseAmount();
@@ -409,7 +441,8 @@ public class UserServiceImpl implements UserService {
                         .add(gstAmount)
                         .add(convenienceFee);
 
-        // 13. CREATE BOOKING
+
+        // 13. Create booking
 
         String bookingId =
                 "BOOK-" + UUID.randomUUID();
@@ -417,12 +450,14 @@ public class UserServiceImpl implements UserService {
         Booking booking =
                 new Booking();
 
-        booking.setBookingId(bookingId);
+        booking.setBookingId(
+                bookingId);
 
-        booking.setUserId(userId);
+        booking.setUserId(
+                userId);
 
-       
-        booking.setId(eventId);
+        booking.setId(
+                eventId);
 
         booking.setVendorId(
                 event.getVendorId());
@@ -440,7 +475,9 @@ public class UserServiceImpl implements UserService {
                 totalAmount);
 
         // Payment not completed yet
-        booking.setBookingStatus("PENDING");
+
+        booking.setBookingStatus(
+                "PENDING");
 
         booking.setCreatedAt(
                 LocalDateTime.now());
@@ -454,27 +491,40 @@ public class UserServiceImpl implements UserService {
         booking.setUpdatedBy(
                 user.getRole());
 
-        userDao.saveBooking(booking);
 
-        //AUTOMATICALLY ALLOCATE WHOLE TABLES
+        userDao.saveBooking(
+                booking);
+
+
+        // 14. AUTOMATIC TABLE ALLOCATION
 
         int remainingGuests =
                 numberOfGuests;
 
-        for (AvailableTable table : availableTables) {
 
-            if (remainingGuests <= 0) {
+        // First try to find ONE table
+        // that can accommodate everyone
+
+        AvailableTable singleTable =
+                null;
+
+        for (AvailableTable table :
+                availableTables) {
+
+            if (table.getCapacity() >=
+                    numberOfGuests) {
+
+                singleTable = table;
+
                 break;
             }
+        }
 
-            // Allocate the entire table.
-            // The table cannot be shared with
-            // another booking.
 
-            int allocatedGuests =
-                    Math.min(
-                            remainingGuests,
-                            table.getCapacity());
+        // 15. If one table is enough,
+        //     allocate that table
+
+        if (singleTable != null) {
 
             BookingTableAllocation bookingTable =
                     new BookingTableAllocation();
@@ -486,7 +536,7 @@ public class UserServiceImpl implements UserService {
                     bookingId);
 
             bookingTable.setTableId(
-                    table.getTableId());
+                    singleTable.getTableId());
 
             bookingTable.setSlotId(
                     request.getSlotId());
@@ -495,20 +545,74 @@ public class UserServiceImpl implements UserService {
                     request.getBookingDate());
 
             bookingTable.setNumberOfGuests(
-                    allocatedGuests);
+                    numberOfGuests);
 
-            // Payment is still pending
             bookingTable.setBookingStatus(
                     "RESERVED");
 
             userDao.saveTableBooking(
                     bookingTable);
 
-            remainingGuests -=
-                    allocatedGuests;
+            remainingGuests = 0;
         }
 
-        //SAFETY CHECK
+
+        // 16. If one table is not enough,
+        //     allocate multiple tables
+
+        if (remainingGuests > 0) {
+
+            for (AvailableTable table :
+                    availableTables) {
+
+                if (remainingGuests <= 0) {
+
+                    break;
+                }
+
+
+                int allocatedGuests =
+                        Math.min(
+                                remainingGuests,
+                                table.getCapacity());
+
+
+                BookingTableAllocation bookingTable =
+                        new BookingTableAllocation();
+
+                bookingTable.setBookingTableAllocationId(
+                        "BT-" + UUID.randomUUID());
+
+                bookingTable.setBookingId(
+                        bookingId);
+
+                bookingTable.setTableId(
+                        table.getTableId());
+
+                bookingTable.setSlotId(
+                        request.getSlotId());
+
+                bookingTable.setBookingDate(
+                        request.getBookingDate());
+
+                bookingTable.setNumberOfGuests(
+                        allocatedGuests);
+
+                bookingTable.setBookingStatus(
+                        "RESERVED");
+
+
+                userDao.saveTableBooking(
+                        bookingTable);
+
+
+                remainingGuests -=
+                        allocatedGuests;
+            }
+        }
+
+
+        // 17. Safety check
 
         if (remainingGuests > 0) {
 
@@ -517,7 +621,8 @@ public class UserServiceImpl implements UserService {
                     + "all requested guests");
         }
 
-        //CREATE PAYMENT RECORD
+
+        // 18. Create payment record
 
         Payment payment =
                 new Payment();
@@ -543,28 +648,36 @@ public class UserServiceImpl implements UserService {
         payment.setTotalAmount(
                 totalAmount);
 
-        // Actual payment gateway will update
-        // these values later.
-        payment.setPaymentMethod(null);
+        // Actual payment gateway
+        // will update these later
+
+        payment.setPaymentMethod(
+                null);
 
         payment.setPaymentStatus(
                 "PENDING");
 
-        payment.setTransactionId(null);
+        payment.setTransactionId(
+                null);
 
         payment.setPaymentDate(
                 LocalDateTime.now());
 
-        userDao.savePayment(payment);
 
-        //SUCCESS RESPONSE
+        userDao.savePayment(
+                payment);
+
+
+        // 19. Return response using mapper
 
         return diningBookingResponseMapper.map(
                 booking,
                 slot,
                 payment,
-                event
-        );
+                event);
     }
-
 }
+
+	
+   
+
