@@ -16,6 +16,7 @@ public class DiningEventResponse {
     private String eventImage;
     private String eventOffers;
     private double eventReview;
+    private String eventDescription;
     
     public DiningEventResponse(
             String eventName,

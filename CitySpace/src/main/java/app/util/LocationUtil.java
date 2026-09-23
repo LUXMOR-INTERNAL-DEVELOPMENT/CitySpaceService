@@ -10,12 +10,10 @@ public class LocationUtil {
 
         String[] parts = fullAddress.split(",");
 
-        if (parts.length < 2) {
+        if (parts.length < 3) {
             return fullAddress.trim();
         }
 
-        
-
-        return parts[parts.length - 3].trim();
+        return parts[2].trim();
     }
 }

@@ -21,6 +21,7 @@ public class DiningEventResponseMapper {
         response.setEventImage(event.getEventImage());
         response.setEventOffers(event.getEventOffers());
         response.setEventReview(event.getEventReview());
+        response.setEventDescription(event.getEventDescription());
 
         return response;
     }

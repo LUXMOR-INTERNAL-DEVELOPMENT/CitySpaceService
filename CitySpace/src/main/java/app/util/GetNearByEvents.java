@@ -24,9 +24,11 @@ public class GetNearByEvents {
             String location,
             double radius) {
 
-        List<Event> events = userRepository.getActiveEvents();
+	    List<Event> events =
+	            userRepository.getActiveEvents();
 
-        List<Event> nearbyEvents = new ArrayList<>();
+	    List<Event> nearbyEvents =
+	            new ArrayList<>();
 
         // 1. Latitude and longitude
         if (latitude != null && longitude != null) {
@@ -47,13 +49,16 @@ public class GetNearByEvents {
             }
         }
 
-        // 2. Location
-        else if (location != null && !location.trim().isEmpty()) {
+	    // 2. Selected location
+	    else if (location != null
+	            && !location.trim().isEmpty()) {
 
-            for (Event event : events) {
+	        for (Event event : events) {
 
-                if (location.equalsIgnoreCase(
-                        event.getEventLocation())) {
+	            if (event.getEventLocation() != null
+	                    && event.getEventLocation()
+	                            .toLowerCase()
+	                            .contains(location.trim().toLowerCase())) {
 
                     nearbyEvents.add(event);
                 }
@@ -77,9 +82,11 @@ public class GetNearByEvents {
 
             for (Event event : events) {
 
-                if (userLocation != null
-                        && userLocation.equalsIgnoreCase(
-                                event.getEventLocation())) {
+	            if (userLocation != null
+	                    && event.getEventLocation() != null
+	                    && event.getEventLocation()
+	                            .toLowerCase()
+	                            .contains(userLocation.trim().toLowerCase())) {
 
                     nearbyEvents.add(event);
                 }
@@ -138,8 +145,10 @@ public class GetNearByEvents {
 
                 if (categoryId.equalsIgnoreCase(
                         event.getCategoryId())
-                        && location.equalsIgnoreCase(
-                                event.getEventLocation())) {
+                        && event.getEventLocation() != null
+                        && event.getEventLocation()
+                                .toLowerCase()
+                                .contains(location.trim().toLowerCase())) {
 
                     categoryEvents.add(event);
                 }
@@ -167,8 +176,10 @@ public class GetNearByEvents {
                 if (categoryId.equalsIgnoreCase(
                         event.getCategoryId())
                         && userLocation != null
-                        && userLocation.equalsIgnoreCase(
-                                event.getEventLocation())) {
+                        && event.getEventLocation() != null
+                        && event.getEventLocation()
+                                .toLowerCase()
+                                .contains(userLocation.trim().toLowerCase())) {
 
                     categoryEvents.add(event);
                 }
