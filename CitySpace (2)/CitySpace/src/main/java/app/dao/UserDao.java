@@ -1,0 +1,85 @@
+package app.dao;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import org.springframework.stereotype.Repository;
+
+import app.dto.CouponApplicableDetailsResponse;
+import app.dto.EvenFilterRequest;
+import app.dto.StatusUpdate;
+import app.dto.UserUpdateProfileRequest;
+import app.entity.Booking;
+import app.entity.Coupon;
+import app.entity.Event;
+import app.entity.StoreBooking;
+import app.entity.StoreCategory;
+import app.entity.StoreProduct;
+import app.entity.User;
+
+
+public interface UserDao {
+ 
+    List<Event> getAllEvents(
+            String userId,
+            Double latitude,
+            Double longitude,
+            String location,
+            double radius);
+
+    List<Event> TopPopularityEvent(
+            String userId,
+            Double latitude,
+            Double longitude,
+            String location,
+            double radius);
+
+    List<Event> weekEndEvents(
+            String userId,
+            Double latitude,
+            Double longitude,
+            String location,
+            double radius);
+
+    User getUser(String user_id);
+
+    String updateProfileById(
+            String user_id,
+            String role,
+            UserUpdateProfileRequest dto);
+
+    String updateStatus(
+            String user_id,
+            String role,
+            StatusUpdate status);
+    
+    List<Event> getActiveEvents();
+    
+    List<Event> getActiveStoreEvents();
+    
+    StoreCategory getCategoryById(String categoryId);
+    
+    List<Event> getStoreByCategory(String categoryId);
+
+   
+    
+    StoreProduct getProductById(String productId);
+    
+    // COMMAND:
+    // Fetch all active and currently valid coupons.
+    List<Coupon> getActiveCoupons();
+
+    // COMMAND:
+    // Fetch one coupon using the coupon ID.
+    Coupon getCouponById(String couponId);
+
+ // COMMAND:
+ // Fetch a booking using its unique booking ID.
+ // The booking provides the original amount for coupon calculation.
+ Booking getBookingById(String bookingId);
+ 
+ CouponApplicableDetailsResponse getApplicableCouponDetails(String couponId);
+ 
+}
+
+
