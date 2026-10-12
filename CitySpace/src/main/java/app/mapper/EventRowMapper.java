@@ -11,6 +11,8 @@ import app.entity.Event;
 
 
 
+
+
 @Component
 public class EventRowMapper implements RowMapper<Event> {
 
@@ -19,10 +21,10 @@ public class EventRowMapper implements RowMapper<Event> {
 
         Event event = new Event();
 
-        event.setId(rs.getString("id"));
+        event.setEventId(rs.getString("event_id"));
 
         event.setVendorId(rs.getString("vendor_id"));
-
+        
         event.setUserId(rs.getString("user_id"));
 
         event.setEventDate(rs.getString("event_date"));
@@ -31,32 +33,29 @@ public class EventRowMapper implements RowMapper<Event> {
 
         event.setCategoryId(rs.getString("category_id"));
 
-        String eventImage = rs.getString("event_image");
-
-        if (eventImage != null) {
-            event.setEventImage(eventImage);
+        if (rs.getBytes("event_image") != null) {
+            event.setEventImage(
+                Base64.getEncoder().encodeToString(
+                    rs.getBytes("event_image")
+                )
+            );
         }
+
         event.setEventLocation(rs.getString("event_location"));
 
         event.setEventDescription(rs.getString("event_description"));
 
-        event.setEventStatus(rs.getString("event_status"));
+        event.setEventStatus(rs.getString("status"));
 
         event.setRating(rs.getDouble("rating"));
 
         event.setEventPrice(rs.getBigDecimal("event_price"));
-        
-        
-        event.setEventReview(rs.getDouble("event_review"));
-        event.setEventOffers(rs.getString("event_offers"));
-       
 
         event.setLatitude(rs.getDouble("latitude"));
 
         event.setLongitude(rs.getDouble("longitude"));
 
-        event.setCategoryName(rs.getString("category_name"));
-
+       
         if (rs.getTimestamp("created_at") != null) {
             event.setCreatedAt(
                 rs.getTimestamp("created_at").toLocalDateTime()

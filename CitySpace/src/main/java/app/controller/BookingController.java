@@ -1,47 +1,47 @@
-package api.Controller;
+package app.controller;
 
-import java.util.List;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import api.Service.BookingService;
-import api.entity.Booking;
+import app.dto.BookingResponse;
+import app.dto.CreateBookingRequest;
+import app.dto.DirectBookingRequest;
+import app.service.impl.BookingServiceImpl;
+import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/bookings")
+@Validated
+@RequestMapping("/api/user/store/booking")
 public class BookingController {
 
-    private final BookingService bookingService;
+    @Autowired
+    private BookingServiceImpl bookingService;
 
-    public BookingController(BookingService bookingService) {
-        this.bookingService = bookingService;
+    // Cart Checkout
+    @PostMapping
+    public ResponseEntity<String> createBooking(
+            @Valid @RequestBody CreateBookingRequest request) {
+
+        bookingService.createBooking(request.getUserId());
+
+        return ResponseEntity.ok(
+                "Booking created successfully");
     }
 
-    @GetMapping("/user/{userId}")
-    public List<Booking> getUserBookings(@PathVariable String userId) {
-        return bookingService.getBookingsByUser(userId);
-    }
 
-    @GetMapping("/vendor/{vendorId}")
-    public List<Booking> getVendorBookings(@PathVariable String vendorId) {
-        return bookingService.getBookingsByVendor(vendorId);
-    }
+    // Direct Book Now
+    @PostMapping("/direct")
+    public ResponseEntity<BookingResponse> createDirectBooking(
+            @Valid @RequestBody DirectBookingRequest request) {
 
-    @GetMapping("/{bookingId}")
-    public Booking getBooking(@PathVariable String bookingId) {
-        return bookingService.getBookingById(bookingId);
-    }
+        BookingResponse response =
+                bookingService.createDirectBooking(request);
 
-    @GetMapping("/vendor/event/{eventId}")
-    public List<Booking> getEventBookings(@PathVariable String eventId) {
-        return bookingService.getBookingsByEvent(eventId);
-    }
-
-    @GetMapping("/admin")
-    public List<Booking> getAllBookings() {
-        return bookingService.getAllBookings();
+        return ResponseEntity.ok(response);
     }
 }

@@ -27,6 +27,8 @@ import app.dto.StatusUpdate;
 import app.dto.StoreBookingRequest;
 import app.dto.StoreBookingResponse;
 import app.dto.StoreCategoryResponse;
+import app.dto.StoreDetailsResponse;
+import app.dto.StoreListResponse;
 import app.dto.StoreProductResponse;
 import app.dto.UserResponse;
 import app.dto.UserUpdateProfileRequest;
@@ -301,6 +303,50 @@ public class UserServiceImpl implements UserService {
 
         return events;
     }
+    
+    @Override
+    public List<StoreListResponse> getAllStores() {
+
+        return userDao.getAllStores();
+    }
+    
+    @Override
+    public StoreDetailsResponse getStoresDetails(String storeId) {
+
+        return userDao.getStoresDetails(storeId);
+    }
+    
+    @Override
+    public List<StoreProductResponse> getProducts() {
+
+        List<StoreProduct> products = userDao.getProducts();
+
+        return products.stream()
+                .map(product -> {
+
+                    StoreProductResponse response =
+                            new StoreProductResponse();
+
+                    response.setProductName(
+                            product.getProductName());
+
+                    response.setProductDescription(
+                            product.getProductDescription());
+
+                    response.setProductPrice(
+                            product.getProductPrice());
+
+                    response.setAvailableQuantity(
+                            product.getAvailableQuantity());
+
+                    response.setProductImage(
+                            product.getProductImage());
+
+                    return response;
+                })
+                .toList();
+    }
+    
     @Override
     public StoreProductResponse getProductById(String productId) {
 

@@ -61,14 +61,14 @@ public class BookingRepository {
             String userId,
             BigDecimal totalAmount) {
 
-        jdbcTemplate.update(
-                createBooking,
-                bookingId,
-                userId,
-                totalAmount,
-                "PENDING",
-                userId
-        );
+    	jdbcTemplate.update(
+    	        createBooking,
+    	        bookingId,
+    	        userId,
+    	        totalAmount,
+    	        "CONFIRMED",
+    	        userId
+    	);
     }
 
     // Create individual booking item

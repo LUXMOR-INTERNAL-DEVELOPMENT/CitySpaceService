@@ -1,114 +1,73 @@
-package api.Dao;
+package app.dao.impl;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.math.BigDecimal;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import api.entity.Booking;
+import app.dao.BookingDao;
+import app.dto.BookingCartItem;
+import app.dto.DirectBookingProduct;
+import app.repository.BookingRepository;
 
 @Repository
-public class BookingDaoimpl implements BookingDao {
+public class BookingDaoImpl implements BookingDao {
 
-    private final JdbcTemplate jdbcTemplate;
-
-    @Value("${booking.getBookingsByUser}")
-    private String getBookingsByUserQuery;
-
-    @Value("${booking.getBookingsByVendor}")
-    private String getBookingsByVendorQuery;
-
-    @Value("${booking.getBookingById}")
-    private String getBookingByIdQuery;
-
-    @Value("${booking.getBookingsByEvent}")
-    private String getBookingsByEventQuery;
-
-    @Value("${booking.getAllBookings}")
-    private String getAllBookingsQuery;
-
-    public BookingDaoimpl(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
-    private RowMapper<Booking> rowMapper = new RowMapper<Booking>() {
-
-        @Override
-        public Booking mapRow(ResultSet rs, int rowNum) throws SQLException {
-
-            Booking booking = new Booking();
-
-            booking.setBookingId(rs.getString("booking_id"));
-            booking.setUserId(rs.getString("user_id"));
-            booking.setVendorId(rs.getString("vendor_id"));
-            booking.setEventId(rs.getString("event_id"));
-
-            if (rs.getTimestamp("booking_date") != null) {
-                booking.setBookingDate(
-                    rs.getTimestamp("booking_date").toLocalDateTime()
-                );
-            }
-
-            booking.setNumberOfTickets(rs.getInt("number_of_tickets"));
-            booking.setAmount(rs.getDouble("amount"));
-            booking.setStatus(rs.getString("status"));
-
-            return booking;
-        }
-    };
+    @Autowired
+    private BookingRepository bookingRepository;
 
     @Override
-    public List<Booking> getBookingsByUser(String userId) {
-        return jdbcTemplate.query(
-            getBookingsByUserQuery,
-            rowMapper,
-            userId
+    public List<BookingCartItem> getCartItemsForBooking(String userId) {
+        return bookingRepository.getCartItemsForBooking(userId);
+    }
+
+    @Override
+    public void createBooking(
+            String bookingId,
+            String userId,
+            BigDecimal totalAmount) {
+
+        bookingRepository.createBooking(
+                bookingId,
+                userId,
+                totalAmount
         );
     }
 
     @Override
-    public List<Booking> getBookingsByVendor(String vendorId) {
-        return jdbcTemplate.query(
-            getBookingsByVendorQuery,
-            rowMapper,
-            vendorId
+    public void createBookingItem(
+            String bookingItemId,
+            String bookingId,
+            String productId,
+            Integer quantity,
+            BigDecimal unitPrice,
+            BigDecimal totalPrice,
+            String userId) {
+
+        bookingRepository.createBookingItem(
+                bookingItemId,
+                bookingId,
+                productId,
+                quantity,
+                unitPrice,
+                totalPrice,
+                userId
         );
     }
 
     @Override
-    public Booking getBookingById(String bookingId) {
-
-        List<Booking> list = jdbcTemplate.query(
-            getBookingByIdQuery,
-            rowMapper,
-            bookingId
-        );
-
-        if (list.isEmpty()) {
-            throw new IllegalArgumentException("Booking not found");
-        }
-
-        return list.get(0);
+    public void clearCart(String userId) {
+        bookingRepository.clearCart(userId);
     }
-
+    
     @Override
-    public List<Booking> getBookingsByEvent(String eventId) {
-        return jdbcTemplate.query(
-            getBookingsByEventQuery,
-            rowMapper,
-            eventId
-        );
+    public void updateBookingStatus(String bookingId, String status) {
+        bookingRepository.updateBookingStatus(bookingId, status);
     }
-
+    
     @Override
-    public List<Booking> getAllBookings() {
-        return jdbcTemplate.query(
-            getAllBookingsQuery,
-            rowMapper
-        );
+    public DirectBookingProduct getProductForBooking(String productId) {
+        return bookingRepository.getProductForBooking(productId);
     }
 }

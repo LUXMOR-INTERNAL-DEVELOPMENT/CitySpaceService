@@ -1,18 +1,17 @@
-package app.Service;
+package app.service;
 
-import java.util.List;
-
-import app.entity.Booking;
+import app.dto.BookingResponse;
+import app.dto.DirectBookingProduct;
+import app.dto.DirectBookingRequest;
 
 public interface BookingService {
 
-    List<Booking> getBookingsByUser(String userId);
+    void createBooking(String userId);
+   
 
-    List<Booking> getBookingsByVendor(String vendorId);
+    BookingResponse createDirectBooking(
+            DirectBookingRequest request);
+    
+    
 
-    Booking getBookingById(String bookingId);
-
-    List<Booking> getBookingsByEvent(String eventId);
-
-    List<Booking> getAllBookings();
 }

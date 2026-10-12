@@ -1,12 +1,49 @@
 package app.service;
 
-import app.entity.Vendor;
+import app.dto.ProductRequest;
+import app.dto.ProductUpdateRequest;
+import app.dto.StoreDescriptionResponse;
+import app.dto.StoreDescriptionUpdateRequest;
+
+import app.dto.StoreLogoNameUpdateRequest;
+import app.dto.StoreLogoResponse;
+import app.dto.StoreLogoUpdateRequest;
+import app.dto.StoreNameResponse;
+import app.dto.StoreNameUpdateRequest;
+import app.entity.StoreDetails;
+import app.entity.StoreProduct;
 
 public interface VendorService {
 
-    Vendor getVendorById(String vendorId);
+	StoreProduct addProduct(ProductRequest productRequest);
+	
+	StoreProduct updateProduct(
+	        String productId,
+	        ProductUpdateRequest request);
+    
+    StoreDetails getStoreDetails(String storeId);
+    
+    
+    StoreNameResponse getStoreName(String storeId);
 
-    Vendor updateVendor(String vendorId, Vendor updatedVendor);
+    StoreNameResponse updateStoreName(
+            String storeId,
+            StoreNameUpdateRequest request);
+    
+    StoreLogoResponse getStoreLogo(String storeId);
 
-    Vendor updateVendorStatus(String vendorId, String status);
+    StoreLogoResponse updateStoreLogo(
+            String storeId,
+            StoreLogoUpdateRequest request);
+    
+    StoreDescriptionResponse getStoreDescription(String storeId);
+
+    StoreDescriptionResponse updateStoreDescription(
+            String storeId,
+            StoreDescriptionUpdateRequest request);
+    
+    
+    
+    
+   
 }

@@ -4,8 +4,6 @@ import java.math.BigDecimal;
 
 public interface PaymentDao {
 
-    BigDecimal getBookingAmount(String bookingId);
-
     void savePayment(
             String paymentId,
             String bookingId,
@@ -16,5 +14,13 @@ public interface PaymentDao {
             BigDecimal totalAmount,
             String paymentMethod,
             String paymentStatus,
-            String transactionId);
+            String transactionId
+    );
+    
+    void updatePayment(
+            String paymentId,
+            String bookingId,
+            String paymentStatus,
+            String transactionId
+    );
 }

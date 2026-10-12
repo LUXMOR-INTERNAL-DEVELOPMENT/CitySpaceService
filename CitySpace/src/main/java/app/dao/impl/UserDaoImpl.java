@@ -1,30 +1,32 @@
 package app.dao.impl;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import app.dao.UserDao;
-import app.dto.AvailableTable;
-import app.dto.BookingTableAllocation;
+import app.dto.CouponApplicableDetailsResponse;
 import app.dto.StatusUpdate;
+import app.dto.StoreDetailsResponse;
+import app.dto.StoreListResponse;
 import app.dto.UserUpdateProfileRequest;
 import app.entity.Booking;
+import app.entity.Coupon;
 import app.entity.Event;
-import app.entity.Payment;
-import app.entity.Restaurant;
-import app.entity.TimeSlot;
+import app.entity.StoreBooking;
+import app.entity.StoreCategory;
+import app.entity.StoreProduct;
 import app.entity.User;
 import app.exception.UserIdNotFoundException;
 import app.mapper.UserMapper;
 import app.repository.UserRepository;
+
 import app.util.GetNearByEvents;
 import app.util.GetPopularityEvents;
 import app.util.WeekEndEvents;
-
 
 @Repository
 public class UserDaoImpl implements UserDao {
@@ -34,7 +36,7 @@ public class UserDaoImpl implements UserDao {
 
     @Autowired
     private UserMapper userMapper;
-
+    
     @Autowired
     private  GetNearByEvents getNearEvents;
 
@@ -60,7 +62,6 @@ public class UserDaoImpl implements UserDao {
     	            radius
     	    );
     }
-   
 
 
     @Override
@@ -150,7 +151,7 @@ public class UserDaoImpl implements UserDao {
 
         existingUser.setUpdatedBy(role);
 
-        userRepository.updateUserProfile(
+        userRepository.updateUser(
                 existingUser
         );
 
@@ -172,11 +173,6 @@ public class UserDaoImpl implements UserDao {
                     "user not found"
             );
         }
-        
-
-        userRepository.updateUserStatus(
-                existingUser
-        );
 
         existingUser.setStatus(
                 status.getStatus()
@@ -188,95 +184,91 @@ public class UserDaoImpl implements UserDao {
 
         existingUser.setUpdatedBy(role);
 
+        userRepository.updateUserStatus(
+                existingUser
+        );
 
         return "status updated successfully";
     }
-
+    
     @Override
     public List<Event> getActiveEvents() {
         return userRepository.getActiveEvents();
     }
-
-    @Override
-    public List<Event> getNearbyEventsByCategory(
-    		String categoryId,
-            String userId,
-            Double latitude,
-            Double longitude,
-            String location,
-            double radius) {
-
-    	 return getNearEvents.getNearbyEventsByCategory(
-    			    categoryId,
-    	            userId,
-    	            latitude,
-    	            longitude,
-    	            location,
-    	            radius
-    	    );
-    }
-	
-
-    @Override
-	public Event getDiningEvent(String eventId) {
-		
-		return userRepository.getDiningEvent(eventId);
-	}
-
-   
-    @Override
-    public int saveBooking(Booking booking) {
-
-        return userRepository.saveBooking(booking);
-    }
-    @Override
-    public int saveTableBooking(
-            BookingTableAllocation bookingTable) {
-
-        return userRepository.saveBookingTableAllocation(
-                bookingTable);
-    }
-    @Override
-    public int savePayment(Payment payment) {
-
-        return userRepository.savePayment(payment);
-    }
-    @Override
-    public TimeSlot getActiveSlot(
-            String slotId,
-            String vendorId) {
-
-        return userRepository.getActiveSlot(
-                slotId,
-                vendorId);
-    }
-
-
-
-    @Override
-    public List<AvailableTable> getAvailableTables(
-            String vendorId,
-            String bookingDate,
-            String slotId) {
-
-        return userRepository.getAvailableTables(
-                vendorId,
-                bookingDate,
-                slotId);
-    }
-    
     
     @Override
-    public List<Restaurant> getTablesForUpdate(
-            String vendorId) {
-
-        return userRepository.getTablesForUpdate(vendorId);
+    public List<Event> getActiveStoreEvents() {
+        return userRepository.getActiveStoreEvents();
+    }
+    
+    @Override
+    public StoreCategory getCategoryById(String categoryId) {
+        return userRepository.getCategoryById(categoryId);
     }
 
+    @Override
+    public List<Event> getStoreByCategory(String categoryId) {
+        return userRepository.getStoreByCategory(categoryId);
+    }
+    
+    @Override
+    public List<StoreListResponse> getAllStores() {
+
+        return userRepository.getAllStores();
+    }
+    
+    @Override
+    public StoreDetailsResponse getStoresDetails(String storeId) {
+
+        return userRepository.getStoresDetails(storeId);
+    }
+    
+    @Override
+    public List<StoreProduct> getProducts() {
+        return userRepository.getProducts();
+    }
+    
    
+    @Override
+    public StoreProduct getProductById(String productId) {
+
+        return userRepository.getProductById(productId);
+    }
+    
+  
+    // COMMAND:
+    // Fetch all active and currently valid coupons through UserRepository.
+    @Override
+    public List<Coupon> getActiveCoupons() {
+
+        return userRepository.getActiveCoupons();
+    }
 
 
-	
+    // COMMAND:
+    // Fetch one coupon using the coupon ID through UserRepository.
+    @Override
+    public Coupon getCouponById(String couponId) {
 
+        return userRepository.getCouponById(couponId);
+    }
+
+
+ // COMMAND:
+ // Fetch the booking using its unique booking ID.
+ @Override
+ public Booking getBookingById(String bookingId) {
+
+     return userRepository.getBookingById(
+             bookingId);
+ }
+ 
+ @Override
+ public CouponApplicableDetailsResponse getApplicableCouponDetails(
+         String couponId) {
+
+     return userRepository.getApplicableCouponDetails(couponId);
+ }
+ 
 
 }

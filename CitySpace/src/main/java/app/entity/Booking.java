@@ -11,28 +11,34 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "booking")
+@Table(name = "store_booking")
 public class Booking {
 
     @Id
     @Column(name = "booking_id")
     private String bookingId;
 
+    @Column(name = "user_id")
     private String userId;
-    private String Id;
-    private String vendorId;
 
-    private String bookingDate;
-    private String slotId;
-
-    private int numberOfGuests;
-
+    @Column(name = "total_amount")
     private BigDecimal totalAmount;
+
+    @Column(name = "booking_status")
     private String bookingStatus;
 
+    @Column(name = "booking_date")
+    private LocalDateTime bookingDate;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "created_by")
     private String createdBy;
 
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "updated_by")
     private String updatedBy;
 }

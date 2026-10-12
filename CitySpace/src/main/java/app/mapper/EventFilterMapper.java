@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-
 import app.dto.EvenFilterRequest;
 import app.entity.Event;
 

@@ -23,6 +23,9 @@ public class Coupon {
     
     @Column(name = "category_id")
     private String categoryId;
+    
+    @Column(name = "vendor_id")
+    private String vendorId;
 
     // COMMAND:
     // Store the offer category/name shown in the UI.

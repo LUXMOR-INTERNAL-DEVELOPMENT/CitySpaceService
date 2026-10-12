@@ -2,14 +2,23 @@ package app.service;
 
 import java.util.List;
 
+import org.apache.coyote.BadRequestException;
 
-import app.dto.DiningBookingRequest;
-import app.dto.DiningBookingResponse;
-import app.dto.DiningEventResponse;
+import app.dto.ApplyCouponRequest;
+import app.dto.ApplyCouponResponse;
+import app.dto.CouponApplicableDetailsResponse;
+import app.dto.CouponResponse;
 import app.dto.EvenFilterRequest;
 import app.dto.EventFilterResponse;
 import app.dto.EventResponse;
+import app.dto.PaymentConfirmationRequest;
 import app.dto.StatusUpdate;
+import app.dto.StoreBookingRequest;
+import app.dto.StoreBookingResponse;
+import app.dto.StoreCategoryResponse;
+import app.dto.StoreDetailsResponse;
+import app.dto.StoreListResponse;
+import app.dto.StoreProductResponse;
 import app.dto.UserResponse;
 import app.dto.UserUpdateProfileRequest;
 import app.entity.Event;
@@ -52,10 +61,37 @@ public interface UserService {
 
     List<EventFilterResponse> getFilteredEvents(EvenFilterRequest filter);
     
-    List<EventResponse> getEventsByCategory(String categoryId, String userId, Double latitude, Double longitude,
-			String location, double radius);
+    List<StoreCategoryResponse> getNearbyStoreCategories(
+            double latitude,
+            double longitude,
+            double radius) throws BadRequestException;
     
-    public DiningEventResponse getDiningEvent(String eventId);
+    List<Event> getStoreByCategory(String categoryId);
     
-    public DiningBookingResponse bookingDining(String userId, String eventId, DiningBookingRequest request);
+    List<StoreListResponse> getAllStores();
+    
+    StoreDetailsResponse getStoresDetails(String storeId);
+    
+    List<StoreProductResponse> getProducts(); 
+    
+    StoreProductResponse getProductById(String productId);
+    
+    // COMMAND:
+    // Fetch all active and currently valid coupons for the coupon list screen.
+    List<CouponResponse> getCouponList();
+
+    // COMMAND:
+    // Validate the user, booking and coupon, then calculate the final amount.
+    ApplyCouponResponse applyCoupon(ApplyCouponRequest request);
+  
+
+
+CouponApplicableDetailsResponse getApplicableCouponDetails(String couponId);
+
+
+
 }
+    
+
+
+

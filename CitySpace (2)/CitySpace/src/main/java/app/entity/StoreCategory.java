@@ -1,5 +1,6 @@
 package app.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -23,6 +24,15 @@ public class StoreCategory {
 
     @Column(name = "category_description")
     private String categoryDescription;
+
+    @Column(name = "rating", nullable = false)
+    private BigDecimal rating;
+
+    @Column(name = "review_count", nullable = false)
+    private Integer reviewCount;
+
+    @Column(name = "review_comment")
+    private String reviewComment;
 
     @Column(name = "status", nullable = false)
     private String status;

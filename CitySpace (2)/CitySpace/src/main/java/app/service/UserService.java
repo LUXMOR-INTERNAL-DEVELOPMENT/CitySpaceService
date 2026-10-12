@@ -16,6 +16,8 @@ import app.dto.StatusUpdate;
 import app.dto.StoreBookingRequest;
 import app.dto.StoreBookingResponse;
 import app.dto.StoreCategoryResponse;
+import app.dto.StoreDetailsResponse;
+import app.dto.StoreListResponse;
 import app.dto.StoreProductResponse;
 import app.dto.UserResponse;
 import app.dto.UserUpdateProfileRequest;
@@ -66,6 +68,12 @@ public interface UserService {
     
     List<Event> getStoreByCategory(String categoryId);
     
+    List<StoreListResponse> getAllStores();
+    
+    StoreDetailsResponse getStoresDetails(String storeId);
+    
+    List<StoreProductResponse> getProducts(); 
+    
     StoreProductResponse getProductById(String productId);
     
     // COMMAND:
@@ -78,7 +86,9 @@ public interface UserService {
   
 
 
-CouponApplicableDetailsResponse getApplicableCouponDetails(String couponId); 
+CouponApplicableDetailsResponse getApplicableCouponDetails(String couponId);
+
+
 
 }
     

@@ -66,6 +66,8 @@ public class CouponRowMapper implements RowMapper<Coupon> {
                 rs.getString("status"));
         
         coupon.setCategoryId(rs.getString("category_id"));
+        
+        coupon.setVendorId(rs.getString("vendor_id"));
 
         return coupon;
     }

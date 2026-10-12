@@ -26,6 +26,8 @@ import app.dto.PaymentConfirmationRequest;
 import app.dto.StatusUpdate;
 import app.dto.StoreBookingRequest;
 import app.dto.StoreBookingResponse;
+import app.dto.StoreDetailsResponse;
+import app.dto.StoreListResponse;
 import app.dto.StoreProductResponse;
 import app.dto.UserUpdateProfileRequest;
 import app.entity.Event;
@@ -185,7 +187,7 @@ public class UserController {
         );
     }
     	
-    @GetMapping("/store/category")
+    @GetMapping("/category/store")
     public ResponseEntity<?> getStoreByCategory(
             @RequestParam
             @NotBlank(message = "Category ID must not be blank")
@@ -193,6 +195,31 @@ public class UserController {
 
         return ResponseEntity.ok(
                 userService.getStoreByCategory(categoryId)
+        );
+    }
+    
+    @GetMapping("/store/category")
+    public ResponseEntity<List<StoreListResponse>> getAllStores() {
+
+        List<StoreListResponse> stores = userService.getAllStores();
+
+        return ResponseEntity.ok(stores);
+    }
+    
+    @GetMapping("/store/{storeId}")
+    public ResponseEntity<StoreDetailsResponse> getStoreDetails(
+            @PathVariable String storeId) {
+
+        StoreDetailsResponse response = userService.getStoresDetails(storeId);
+
+        return ResponseEntity.ok(response);
+    }
+    
+    @GetMapping("/store/products")
+    public ResponseEntity<List<StoreProductResponse>> getProducts() {
+
+        return ResponseEntity.ok(
+                userService.getProducts()
         );
     }
     

@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository;
 import app.dao.UserDao;
 import app.dto.CouponApplicableDetailsResponse;
 import app.dto.StatusUpdate;
+import app.dto.StoreDetailsResponse;
+import app.dto.StoreListResponse;
 import app.dto.UserUpdateProfileRequest;
 import app.entity.Booking;
 import app.entity.Coupon;
@@ -209,6 +211,23 @@ public class UserDaoImpl implements UserDao {
         return userRepository.getStoreByCategory(categoryId);
     }
     
+    @Override
+    public List<StoreListResponse> getAllStores() {
+
+        return userRepository.getAllStores();
+    }
+    
+    @Override
+    public StoreDetailsResponse getStoresDetails(String storeId) {
+
+        return userRepository.getStoresDetails(storeId);
+    }
+    
+    @Override
+    public List<StoreProduct> getProducts() {
+        return userRepository.getProducts();
+    }
+    
    
     @Override
     public StoreProduct getProductById(String productId) {
@@ -249,5 +268,7 @@ public class UserDaoImpl implements UserDao {
          String couponId) {
 
      return userRepository.getApplicableCouponDetails(couponId);
- } 
+ }
+ 
+
 }

@@ -11,31 +11,47 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name="event")
-
+@Table(name = "event")
 public class Event {
 
-	@Id
-	@Column(name="id")
-	private String Id;
-	private String vendorId;
-	private String userId;
-	private String eventName;
-	private String eventDate;
-	private String eventLocation;
-	private String eventDescription;
-	private String eventImage;
-	private double eventReview;
-	private String eventOffers;
-	private String eventStatus;
-	private double rating;
-	private BigDecimal eventPrice;
-	private double latitude;
-	private double longitude;
-	private String categoryId;
-	private String categoryName;
-	private LocalDateTime createdAt;
-	private String createdBy;
-	private LocalDateTime updatedAt;
-	private String updatedBy;
+    @Id
+    @Column(name = "event_id")
+    private String eventId;
+
+    private String vendorId;
+
+    private String userId;
+
+    private String eventName;
+
+    private String eventDate;
+
+    private String eventLocation;
+
+    private String eventDescription;
+
+    private String eventImage;
+
+    private String eventStatus;
+
+    private double rating;
+
+    private BigDecimal eventPrice;
+
+    private Double latitude;
+
+    private Double longitude;
+
+    private String categoryId;
+
+    private String categoryName;
+
+
+    private LocalDateTime createdAt;
+
+    private String createdBy;
+
+    private LocalDateTime updatedAt;
+
+    private String updatedBy;
 }

@@ -15,11 +15,6 @@ public class PaymentDaoImpl implements PaymentDao {
     private PaymentRepository paymentRepository;
 
     @Override
-    public BigDecimal getBookingAmount(String bookingId) {
-        return paymentRepository.getBookingAmount(bookingId);
-    }
-
-    @Override
     public void savePayment(
             String paymentId,
             String bookingId,
@@ -42,6 +37,22 @@ public class PaymentDaoImpl implements PaymentDao {
                 totalAmount,
                 paymentMethod,
                 paymentStatus,
-                transactionId);
+                transactionId
+        );
+    }
+    
+    @Override
+    public void updatePayment(
+            String paymentId,
+            String bookingId,
+            String paymentStatus,
+            String transactionId) {
+
+        paymentRepository.updatePayment(
+                paymentId,
+                bookingId,
+                paymentStatus,
+                transactionId
+        );
     }
 }

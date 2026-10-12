@@ -1,18 +1,32 @@
-package api.Dao;
+package app.dao;
 
+import java.math.BigDecimal;
 import java.util.List;
 
-import api.entity.Booking;
+import app.dto.BookingCartItem;
+import app.dto.DirectBookingProduct;
 
 public interface BookingDao {
 
-    List<Booking> getBookingsByUser(String userId);
+    List<BookingCartItem> getCartItemsForBooking(String userId);
 
-    List<Booking> getBookingsByVendor(String vendorId);
+    void createBooking(
+            String bookingId,
+            String userId,
+            BigDecimal totalAmount);
 
-    Booking getBookingById(String bookingId);
+    void createBookingItem(
+            String bookingItemId,
+            String bookingId,
+            String productId,
+            Integer quantity,
+            BigDecimal unitPrice,
+            BigDecimal totalPrice,
+            String userId);
 
-    List<Booking> getBookingsByEvent(String eventId);
-
-    List<Booking> getAllBookings();
+    void clearCart(String userId);
+    
+    void updateBookingStatus(String bookingId, String status);
+    
+    DirectBookingProduct getProductForBooking(String productId);
 }

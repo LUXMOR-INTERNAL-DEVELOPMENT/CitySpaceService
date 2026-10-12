@@ -7,20 +7,24 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-
-import app.dto.AvailableTable;
-import app.dto.BookingTableAllocation;
+import app.dto.CouponApplicableDetailsResponse;
+import app.dto.StoreDetailsResponse;
+import app.dto.StoreListResponse;
 import app.entity.Booking;
+import app.entity.Coupon;
 import app.entity.Event;
-import app.entity.Payment;
-import app.entity.Restaurant;
-import app.entity.TimeSlot;
+import app.entity.StoreCategory;
+import app.entity.StoreDetails;
+import app.entity.StoreProduct;
 import app.entity.User;
-import app.mapper.AvailableTableRowMapper;
+import app.mapper.CouponApplicableDetailsRowMapper;
+import app.mapper.CouponRowMapper;
 import app.mapper.EventRowMapper;
-import app.mapper.RestaurantRowMapper;
-import app.mapper.TimeSlotRowMapper;
+import app.mapper.StoreCategoryRowMapper;
+import app.mapper.StoreListRowMapper;
+import app.mapper.StoreProductRowMapper;
 import app.mapper.UserRowMapper;
+import app.mapper.UserStoreDetailsRowMapper;
 
 @Repository
 public class UserRepository {
@@ -31,6 +35,9 @@ public class UserRepository {
     @Value("${event.getActiveEvents}")
     private String getActiveEventsQuery;
 
+    @Value("${store.getActiveStoreEvents}")
+    private String getActiveStoreEventsQuery;
+
     @Value("${user.getUserById}")
     private String getUserByIdQuery;
 
@@ -40,27 +47,40 @@ public class UserRepository {
     @Value("${user.updateUserStatus}")
     private String updateUserStatusQuery;
 
-    @Value("${event.getDiningevent}")
-    private String getDiningEventDetailsQuery;
+    @Value("${store.getCategoryById}")
+    private String getCategoryByIdQuery;
 
-    @Value("${event.bookingDining}")
-    private String bookingDiningQuery;
+    @Value("${store.getStoreByCategory}")
+    private String getStoreByCategoryQuery;
 
-    @Value("${event.tableBooking}")
-    private String tableBookingQuery;
+    @Value("${store.getAllStores}")
+    private String getAllStoresQuery;
 
-    @Value("${event.payment}")
-    private String paymentQuery;
+    // Coupon queries
+    @Value("${coupon.getActiveCoupons}")
+    private String getActiveCouponsQuery;
 
-    @Value("${event.getTimeSlot}")
-    private String getTimeSlotQuery;
+    @Value("${coupon.getCouponById}")
+    private String getCouponByIdQuery;
 
-    @Value("${event.getAvailableTables}")
-    private String getAvailableTablesQuery;
+    @Value("${coupon.getBookingById}")
+    private String getBookingByIdQuery;
 
-    @Value("${event.getTablesForUpdate}")
-    private String getTablesForUpdateQuery;
+    @Value("${coupon.getApplicableDetails}")
+    private String getApplicableDetailsQuery;
 
+    // Product queries
+    @Value("${store.getProducts}")
+    private String getProductsQuery;
+
+    @Value("${store.getProductById}")
+    private String getProductByIdQuery;
+
+    // User-side Store Details query
+    @Value("${store.getStoresDetails}")
+    private String getStoresDetailsQuery;
+
+    // RowMappers
     @Autowired
     private UserRowMapper userRowMapper;
 
@@ -68,14 +88,27 @@ public class UserRepository {
     private EventRowMapper eventRowMapper;
 
     @Autowired
-    private TimeSlotRowMapper timeSlotRowMapper;
+    private StoreCategoryRowMapper storeCategoryRowMapper;
 
     @Autowired
-    private AvailableTableRowMapper availableTableRowMapper;
+    private StoreListRowMapper storeListRowMapper;
 
     @Autowired
-    private RestaurantRowMapper restaurantRowMapper;
+    private UserStoreDetailsRowMapper userStoreDetailsRowMapper;
 
+    @Autowired
+    private StoreProductRowMapper storeProductRowMapper;
+
+    @Autowired
+    private CouponRowMapper couponRowMapper;
+
+    @Autowired
+    private CouponApplicableDetailsRowMapper couponApplicableDetailsRowMapper;
+
+
+    // =========================
+    // Event
+    // =========================
 
     public List<Event> getActiveEvents() {
 
@@ -86,6 +119,10 @@ public class UserRepository {
     }
 
 
+    // =========================
+    // User
+    // =========================
+
     public User getUserById(String user_id) {
 
         return jdbcTemplate.queryForObject(
@@ -95,8 +132,7 @@ public class UserRepository {
         );
     }
 
-
-    public int updateUserProfile(User user) {
+    public int updateUser(User user) {
 
         return jdbcTemplate.update(
                 updateUserQuery,
@@ -110,7 +146,6 @@ public class UserRepository {
         );
     }
 
-
     public int updateUserStatus(User user) {
 
         return jdbcTemplate.update(
@@ -121,109 +156,166 @@ public class UserRepository {
     }
 
 
-    public Event getDiningEvent(String eventId) {
+    // =========================
+    // Store Events
+    // =========================
+
+    public List<Event> getActiveStoreEvents() {
+
+        return jdbcTemplate.query(
+                getActiveStoreEventsQuery,
+                eventRowMapper
+        );
+    }
+
+
+    // =========================
+    // Store Category
+    // =========================
+
+    public StoreCategory getCategoryById(String categoryId) {
 
         return jdbcTemplate.queryForObject(
-                getDiningEventDetailsQuery,
+                getCategoryByIdQuery,
+                storeCategoryRowMapper,
+                categoryId
+        );
+    }
+
+
+    public List<Event> getStoreByCategory(String categoryId) {
+
+        return jdbcTemplate.query(
+                getStoreByCategoryQuery,
                 eventRowMapper,
-                eventId
+                categoryId
         );
     }
 
 
-    public int saveBooking(Booking booking) {
+    // =========================
+    // Store Products
+    // =========================
 
-        return jdbcTemplate.update(
-                bookingDiningQuery,
-
-                booking.getBookingId(),
-                booking.getUserId(),
-                booking.getId(),
-                booking.getVendorId(),
-                booking.getBookingDate(),
-                booking.getSlotId(),
-                booking.getNumberOfGuests(),
-                booking.getTotalAmount(),
-                booking.getBookingStatus(),
-                booking.getCreatedAt(),
-                booking.getCreatedBy(),
-                booking.getUpdatedAt(),
-                booking.getUpdatedBy()
-        );
-    }
-
-
-    public int saveBookingTableAllocation(
-            BookingTableAllocation bookingTable) {
-
-        return jdbcTemplate.update(
-                tableBookingQuery,
-
-                bookingTable.getBookingTableAllocationId(),
-                bookingTable.getBookingId(),
-                bookingTable.getTableId(),
-                bookingTable.getSlotId(),
-                bookingTable.getBookingDate(),
-                bookingTable.getNumberOfGuests(),
-                bookingTable.getBookingStatus()
-        );
-    }
-
-
-    public int savePayment(Payment payment) {
-
-        return jdbcTemplate.update(
-                paymentQuery,
-                payment.getPaymentId(),
-                payment.getBookingId(),
-                payment.getBookingAmount(),
-                payment.getGstPercentage(),
-                payment.getGstAmount(),
-                payment.getConvenienceFee(),
-                payment.getTotalAmount(),
-                payment.getPaymentMethod(),
-                payment.getPaymentStatus(),
-                payment.getTransactionId(),
-                payment.getPaymentDate()
-        );
-    }
-
-
-    public List<AvailableTable> getAvailableTables(
-            String vendorId,
-            String bookingDate,
-            String slotId) {
-
-        return jdbcTemplate.query(
-                getAvailableTablesQuery,
-                availableTableRowMapper,
-                vendorId,
-                bookingDate,
-                slotId
-        );
-    }
-
-
-    public TimeSlot getActiveSlot(
-            String slotId,
-            String vendorId) {
+    public StoreProduct getProductById(String productId) {
 
         return jdbcTemplate.queryForObject(
-                getTimeSlotQuery,
-                timeSlotRowMapper,
-                slotId,
-                vendorId
+                getProductByIdQuery,
+                storeProductRowMapper,
+                productId
         );
     }
 
 
-    public List<Restaurant> getTablesForUpdate(
-            String vendorId) {
+    public List<StoreProduct> getProducts() {
 
         return jdbcTemplate.query(
-                getTablesForUpdateQuery,
-                restaurantRowMapper,
-                vendorId
+                getProductsQuery,
+                storeProductRowMapper
         );
     }
+
+
+    // =========================
+    // Store List
+    // =========================
+
+    public List<StoreListResponse> getAllStores() {
+
+        return jdbcTemplate.query(
+                getAllStoresQuery,
+                storeListRowMapper
+        );
+    }
+
+
+    // =========================
+    // User Store Details
+    // =========================
+
+    public StoreDetailsResponse getStoresDetails(String storeId) {
+
+        return jdbcTemplate.queryForObject(
+                getStoresDetailsQuery,
+                userStoreDetailsRowMapper,
+                storeId
+        );
+    }
+
+
+    // =========================
+    // Coupons
+    // =========================
+
+    // Fetch all active and currently valid coupons
+    public List<Coupon> getActiveCoupons() {
+
+        return jdbcTemplate.query(
+                getActiveCouponsQuery,
+                couponRowMapper
+        );
+    }
+
+
+    // Fetch one coupon using coupon ID
+    public Coupon getCouponById(String couponId) {
+
+        return jdbcTemplate.queryForObject(
+                getCouponByIdQuery,
+                couponRowMapper,
+                couponId
+        );
+    }
+
+
+    // =========================
+    // Booking
+    // =========================
+
+    // Fetch booking using booking ID
+    public Booking getBookingById(String bookingId) {
+
+        return jdbcTemplate.queryForObject(
+                getBookingByIdQuery,
+                (rs, rowNum) -> {
+
+                    Booking booking = new Booking();
+
+                    booking.setBookingId(
+                            rs.getString("booking_id")
+                    );
+
+                    booking.setUserId(
+                            rs.getString("user_id")
+                    );
+
+                    booking.setTotalAmount(
+                            rs.getBigDecimal("total_amount")
+                    );
+
+                    booking.setBookingStatus(
+                            rs.getString("booking_status")
+                    );
+
+                    return booking;
+                },
+                bookingId
+        );
+    }
+
+
+    // =========================
+    // Applicable Coupon Details
+    // =========================
+
+    public CouponApplicableDetailsResponse getApplicableCouponDetails(
+            String couponId) {
+
+        return jdbcTemplate.queryForObject(
+                getApplicableDetailsQuery,
+                couponApplicableDetailsRowMapper,
+                couponId
+        );
+    }
+
 }

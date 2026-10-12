@@ -12,36 +12,50 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 
-
-import app.dto.DiningBookingRequest;
-import app.dto.DiningBookingResponse;
-import app.dto.DiningEventResponse;
+import app.dto.ApplyCouponRequest;
+import app.dto.ApplyCouponResponse;
+import app.dto.CouponApplicableDetailsResponse;
+import app.dto.CouponResponse;
 import app.dto.EvenFilterRequest;
 import app.dto.EventFilterResponse;
 import app.dto.EventResponse;
+import app.dto.PaymentConfirmationRequest;
 import app.dto.StatusUpdate;
+import app.dto.StoreBookingRequest;
+import app.dto.StoreBookingResponse;
+import app.dto.StoreDetailsResponse;
+import app.dto.StoreListResponse;
+import app.dto.StoreProductResponse;
 import app.dto.UserUpdateProfileRequest;
 import app.entity.Event;
+import app.service.PaymentService;
 import app.service.impl.UserServiceImpl;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 
 
 
 @RestController
 @RequestMapping("/api/user")
+@Validated
 public class UserController {
 
     @Autowired
     private UserServiceImpl userService;
+    
+    @Autowired
+    private PaymentService paymentService;
 
     @GetMapping("/list")
     public ResponseEntity<?> getAllEvents(
             @RequestParam(required=false) String userId,
             @RequestParam(required = false) Double latitude,
             @RequestParam(required = false) Double longitude,
-            @RequestParam(required = false,defaultValue = "Chennai") String location,
+            @RequestParam(required = false) String location,
             @RequestParam(defaultValue = "10") double radius) {
 
         List<Event> event =
@@ -64,7 +78,7 @@ public class UserController {
             @RequestParam String userId,
             @RequestParam(required = false) Double latitude,
             @RequestParam(required = false) Double longitude,
-            @RequestParam(required = false,defaultValue = "Chennai")  String location,
+            @RequestParam(required = false) String location,
             @RequestParam(defaultValue = "10") double radius) {
 
         List<EventResponse> event =
@@ -87,7 +101,7 @@ public class UserController {
             @RequestParam String userId,
             @RequestParam(required = false) Double latitude,
             @RequestParam(required = false) Double longitude,
-            @RequestParam(required = false,defaultValue = "Chennai") String location,
+            @RequestParam(required = false) String location,
             @RequestParam(defaultValue = "10") double radius) {
 
         List<EventResponse> event =
@@ -146,7 +160,7 @@ public class UserController {
                 HttpStatus.OK
         );
     }
-
+    
     @GetMapping("/filter/events")
     public ResponseEntity<?> getFilteredEvents(
             @RequestBody EvenFilterRequest filter) {
@@ -157,49 +171,108 @@ public class UserController {
         return ResponseEntity.ok(events);
     }
     
-    @GetMapping("/list/category/{categoryId}")
-    public ResponseEntity<?> getEventsByCategory(
-
-            @PathVariable String categoryId,
-
-            @RequestParam String userId,
-
-            @RequestParam(required = false) Double latitude,
-
-            @RequestParam(required = false) Double longitude,
-
-            @RequestParam(required = false, defaultValue = "Chennai") String location,
-
+   
+    @GetMapping("/store/categories")
+    public ResponseEntity<?> getNearbyStoreCategories(
+            @RequestParam double latitude,
+            @RequestParam double longitude,
             @RequestParam(defaultValue = "10") double radius) {
 
-        List<EventResponse> events = userService.getEventsByCategory(
-                categoryId,
-                userId,
-                latitude,
-                longitude,
-                location,
-                radius
+        return ResponseEntity.ok(
+                userService.getNearbyStoreCategories(
+                        latitude,
+                        longitude,
+                        radius
+                )
         );
+    }
+    	
+    @GetMapping("/category/store")
+    public ResponseEntity<?> getStoreByCategory(
+            @RequestParam
+            @NotBlank(message = "Category ID must not be blank")
+            String categoryId) {
 
-        return ResponseEntity.ok(events);
+        return ResponseEntity.ok(
+                userService.getStoreByCategory(categoryId)
+        );
     }
     
-    @GetMapping("/diningevent/{Id}")
-    public ResponseEntity<?> getDiningEvent(@PathVariable String Id) {
+    @GetMapping("/store/category")
+    public ResponseEntity<List<StoreListResponse>> getAllStores() {
 
-        DiningEventResponse event=userService.getDiningEvent(Id);
+        List<StoreListResponse> stores = userService.getAllStores();
 
-        return ResponseEntity.ok(event);
+        return ResponseEntity.ok(stores);
     }
     
-    @PostMapping("/booking/dining")
-    
-    public ResponseEntity<?> bookingDining(@RequestParam String userId,
-            @RequestParam String Id,@RequestBody DiningBookingRequest request) {
+    @GetMapping("/store/{storeId}")
+    public ResponseEntity<StoreDetailsResponse> getStoreDetails(
+            @PathVariable String storeId) {
 
-        DiningBookingResponse response =userService.bookingDining(userId,Id,request);
+        StoreDetailsResponse response = userService.getStoresDetails(storeId);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.ok(response);
     }
     
-}
+    @GetMapping("/store/products")
+    public ResponseEntity<List<StoreProductResponse>> getProducts() {
+
+        return ResponseEntity.ok(
+                userService.getProducts()
+        );
+    }
+    
+    @GetMapping("/store/product/{productId}")
+    public ResponseEntity<StoreProductResponse> getProductById(
+            @PathVariable String productId) {
+
+        return ResponseEntity.ok(
+                userService.getProductById(productId)
+        );
+    }
+    
+ // COMMAND:
+    // Return all active and currently valid coupons.
+    @GetMapping("/coupon/list")
+    public ResponseEntity<?> getCouponList() {
+
+        // COMMAND:
+        // Get the coupon list through the existing UserServiceImpl.
+        List<CouponResponse> coupons =
+                userService.getCouponList();
+
+        // COMMAND:
+        // Return the coupon list with HTTP 200 OK.
+        return ResponseEntity.ok(coupons);
+    }
+    
+ // COMMAND:
+ // Apply the selected coupon to the user's booking
+ // and return the calculated amount.
+ @PostMapping("/coupon/apply")
+ public ResponseEntity<?> applyCoupon(
+         @RequestBody ApplyCouponRequest request) {
+
+     // COMMAND:
+     // Apply the coupon through the existing UserServiceImpl.
+     ApplyCouponResponse response =
+             userService.applyCoupon(request);
+
+     // COMMAND:
+     // Return the calculated coupon result with HTTP 200 OK.
+     return ResponseEntity.ok(response);
+ }
+ 
+ @GetMapping("/store/coupon/{couponId}")
+ public ResponseEntity<CouponApplicableDetailsResponse> getApplicableCouponDetails(
+         @PathVariable @NotBlank(message = "Coupon ID is required") String couponId) {
+
+     CouponApplicableDetailsResponse response =
+             userService.getApplicableCouponDetails(couponId);
+
+     return ResponseEntity.ok(response);
+ }
+  
+    }
+

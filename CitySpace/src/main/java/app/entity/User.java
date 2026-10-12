@@ -12,7 +12,7 @@ import lombok.Data;
 @Data
 @Table(name="user")
 public class User {
-
+   
 	@Id
 	@Column(name="user_id")
 	private String userId;
@@ -20,15 +20,12 @@ public class User {
 	private String email;
 	private String password;
 	private String userLocation;
-	
 	private Long phoneno;
-	
 	private String status;
 	private LocalDateTime createdAt;
 	private String createdBy;
 	private LocalDateTime updatedAt;
 	private String updatedBy;
-	
 	private String role;
-
+	
 }

@@ -1,22 +1,27 @@
-
 package app.dao;
 
+import java.math.BigDecimal;
 import java.util.List;
 
-import app.dto.AvailableTable;
-import app.dto.BookingTableAllocation;
+
+
+import app.dto.CouponApplicableDetailsResponse;
+import app.dto.EvenFilterRequest;
 import app.dto.StatusUpdate;
+import app.dto.StoreDetailsResponse;
+import app.dto.StoreListResponse;
 import app.dto.UserUpdateProfileRequest;
 import app.entity.Booking;
+import app.entity.Coupon;
 import app.entity.Event;
-import app.entity.Payment;
-import app.entity.Restaurant;
-import app.entity.TimeSlot;
+import app.entity.StoreBooking;
+import app.entity.StoreCategory;
+import app.entity.StoreProduct;
 import app.entity.User;
 
 
 public interface UserDao {
-
+ 
     List<Event> getAllEvents(
             String userId,
             Double latitude,
@@ -39,8 +44,6 @@ public interface UserDao {
             double radius);
 
     User getUser(String user_id);
-    
-   
 
     String updateProfileById(
             String user_id,
@@ -51,39 +54,40 @@ public interface UserDao {
             String user_id,
             String role,
             StatusUpdate status);
-
-    List<Event> getActiveEvents(); 
     
-    List<Event> getNearbyEventsByCategory(
-    		String categoryId,
-            String userId,
-            Double latitude,
-            Double longitude,
-            String location,
-            double radius) ;
+    List<Event> getActiveEvents();
     
-    Event getDiningEvent(String eventId);
+    List<Event> getActiveStoreEvents();
     
-    int saveBooking(Booking booking);
+    StoreCategory getCategoryById(String categoryId);
+    
+    List<Event> getStoreByCategory(String categoryId);
+    
+    List<StoreListResponse> getAllStores();
+    
+    StoreDetailsResponse getStoresDetails(String storeId);
 
-    int saveTableBooking(BookingTableAllocation bookingTable);
+    List<StoreProduct> getProducts();
+    
+    StoreProduct getProductById(String productId);
+    
+    // COMMAND:
+    // Fetch all active and currently valid coupons.
+    List<Coupon> getActiveCoupons();
 
-    int savePayment(Payment payment);
-
-    TimeSlot getActiveSlot(
-            String slotId,
-            String vendorId);
-
-    List<AvailableTable> getAvailableTables(
-            String vendorId,
-            String bookingDate,
-            String slotId);
+    // COMMAND:
+    // Fetch one coupon using the coupon ID.
+    Coupon getCouponById(String couponId);
     
   
-    public List<Restaurant> getTablesForUpdate(
-            String vendorId) ;
 
-  
-
-
+ // COMMAND:
+ // Fetch a booking using its unique booking ID.
+ // The booking provides the original amount for coupon calculation.
+ Booking getBookingById(String bookingId);
+ 
+ CouponApplicableDetailsResponse getApplicableCouponDetails(String couponId);
+ 
 }
+
+

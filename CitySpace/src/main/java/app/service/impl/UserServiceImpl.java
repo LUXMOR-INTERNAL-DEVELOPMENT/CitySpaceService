@@ -3,68 +3,66 @@ package app.service.impl;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.dao.EmptyResultDataAccessException;
 
-import app.dao.impl.UserDaoImpl;
-import app.dto.AvailableTable;
-import app.dto.BookingTableAllocation;
-import app.dto.DiningBookingRequest;
-import app.dto.DiningBookingResponse;
-import app.dto.DiningEventResponse;
+
+
+
+import app.dao.UserDao;
+import app.dto.ApplyCouponRequest;
+import app.dto.ApplyCouponResponse;
+import app.dto.CouponApplicableDetailsResponse;
+import app.dto.CouponResponse;
 import app.dto.EvenFilterRequest;
 import app.dto.EventFilterResponse;
 import app.dto.EventResponse;
+import app.dto.PaymentConfirmationRequest;
 import app.dto.StatusUpdate;
+import app.dto.StoreBookingRequest;
+import app.dto.StoreBookingResponse;
+import app.dto.StoreCategoryResponse;
+import app.dto.StoreDetailsResponse;
+import app.dto.StoreListResponse;
+import app.dto.StoreProductResponse;
 import app.dto.UserResponse;
 import app.dto.UserUpdateProfileRequest;
 import app.entity.Booking;
+import app.entity.Coupon;
 import app.entity.Event;
-import app.entity.Payment;
-import app.entity.Restaurant;
-import app.entity.TimeSlot;
+import app.entity.StoreBooking;
+import app.entity.StoreCategory;
+import app.entity.StoreProduct;
 import app.entity.User;
 import app.exception.AccessDeniedException;
+import app.exception.BadRequestException;
 import app.exception.EventNotAvailableException;
-import app.exception.InvalidBookingDateException;
-import app.exception.InvalidGuestCountException;
-import app.exception.SlotExpiredException;
-import app.exception.SlotNotAvailableException;
-import app.exception.TableNotAvailableException;
+import app.exception.InsufficientQuantityException;
+import app.exception.ResourceNotFoundException;
 import app.exception.UserIdNotFoundException;
-import app.exception.VendorNotAvailableException;
-import app.mapper.DiningBookingResponseMapper;
-import app.mapper.DiningEventResponseMapper;
 import app.mapper.EventFilterMapper;
 import app.mapper.EventResponseFilterMapper;
 import app.mapper.EventResponseMapper;
 import app.mapper.UserResponseMapper;
 import app.service.UserService;
-import app.util.DiningBookingValidator;
-import app.util.GetNearByEvents;
-import app.util.TableAllocationHandling;
-import jakarta.transaction.Transactional;
-
+import app.util.DistanceCalculator;
+import app.util.OfferCalculation;
 
 @Service
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserDaoImpl userDao;
-
+	@Autowired
+	private UserDao userDao;
     @Autowired
     private UserResponseMapper mapper;
 
     @Autowired
-    private EventResponseMapper eventResponseMapper;
+    private EventResponseMapper eventRespnseMapper;
     
     @Autowired
     private EventResponseFilterMapper eventFilterResponse;
@@ -72,17 +70,6 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private EventFilterMapper  eventFilterMapper;
     
-    @Autowired
-    private DiningEventResponseMapper diningEventResponseMapper;
-    
-    @Autowired
-    private DiningBookingResponseMapper diningBookingResponseMapper;
-    
-    @Autowired
-    private DiningBookingValidator diningBookingValidator;
-    
-    @Autowired
-    private TableAllocationHandling  tableAllocationHandling;
    
 
     @Override
@@ -129,7 +116,7 @@ public class UserServiceImpl implements UserService {
                 );
 
         List<EventResponse> response =
-                eventResponseMapper.eventResponse(events);
+                eventRespnseMapper.eventResponse(events);
 
         if (response.isEmpty()) {
             throw new EventNotAvailableException(
@@ -139,7 +126,6 @@ public class UserServiceImpl implements UserService {
 
         return response;
     }
-    
 
     @Override
     public List<EventResponse> weekEndEvents(
@@ -159,7 +145,7 @@ public class UserServiceImpl implements UserService {
                 );
 
         List<EventResponse> response =
-                eventResponseMapper.eventResponse(events);
+                eventRespnseMapper.eventResponse(events);
 
         if (response.isEmpty()) {
             throw new EventNotAvailableException(
@@ -190,10 +176,12 @@ public class UserServiceImpl implements UserService {
 
         User user = userDao.getUser(user_id);
 
-        if (!user_id.equals(user.getUserId())
-                || "VENDOR".equals(role)) {
+        if (!user.getUserId().equals(user_id)
+                || role.equals("VENDOR")) {
 
-            throw new AccessDeniedException("You cannot have access to modify profile");
+            throw new AccessDeniedException(
+                    "You cannot have access to modify profile "
+            );
         }
 
         return userDao.updateProfileById(
@@ -209,13 +197,15 @@ public class UserServiceImpl implements UserService {
             String role,
             StatusUpdate status) {
 
-    	 User user = userDao.getUser(user_id);
+        User user = userDao.getUser(user_id);
 
-    	    if (!user_id.equals(user.getUserId())
-    	            || "VENDOR".equals(role)) {
+        if (!user.getUserId().equals(user_id)
+                || role.equals("VENDOR")) {
 
-    	        throw new AccessDeniedException("You cannot have access to modify profile");
-    	    }
+            throw new AccessDeniedException(
+                    "You cannot have access to modify profile "
+            );
+        }
 
         return userDao.updateStatus(
                 user_id,
@@ -241,174 +231,455 @@ public class UserServiceImpl implements UserService {
 
         return response;
     }
-    
     @Override
-    public List<EventResponse> getEventsByCategory(
-            String categoryId,
-            String userId,
-            Double latitude,
-            Double longitude,
-            String location,
-            double radius) {
+    public List<StoreCategoryResponse> getNearbyStoreCategories(
+            double latitude,
+            double longitude,
+            double radius) throws BadRequestException  {
+    	if (latitude < -90 || latitude > 90) {
+    	    throw new BadRequestException(
+    	            "Latitude must be between -90 and 90");
+    	}
 
+    	if (longitude < -180 || longitude > 180) {
+    	    throw new BadRequestException(
+    	            "Longitude must be between -180 and 180");
+    	}
+
+    	if (radius <= 0) {
+    	    throw new BadRequestException(
+    	            "Radius must be greater than 0");
+    	}
+    	
+
+        List<Event> events = userDao.getActiveStoreEvents();
+
+        List<Event> nearbyEvents = events.stream()
+                .filter(event -> event.getLatitude() != null)
+                .filter(event -> event.getLongitude() != null)
+                .filter(event ->
+                        DistanceCalculator.calculateDistance(
+                                latitude,
+                                longitude,
+                                event.getLatitude(),
+                                event.getLongitude()
+                        ) <= radius
+                )
+                .toList();
+        List<String> categoryIds = nearbyEvents.stream()
+                .map(Event::getCategoryId)
+                .distinct()
+                .toList();
+        List<StoreCategory> categories = categoryIds.stream()
+                .map(categoryId -> userDao.getCategoryById(categoryId))
+                .toList();
         
-    	 List<Event> events =
-                 userDao.getNearbyEventsByCategory(categoryId, userId, latitude, longitude, location, radius);
+        List<StoreCategoryResponse> response = categories.stream()
+                .map(category -> {
+                    StoreCategoryResponse result = new StoreCategoryResponse();
 
-         List<EventResponse> response =
-                 eventResponseMapper.eventResponse(events);
+                    result.setCategoryId(category.getCategoryId());
+                    result.setCategoryName(category.getCategoryName());
 
-         if (response.isEmpty()) {
-             throw new EventNotAvailableException(
-                     "Events are not scheduled or available in the surrounding area"
-             );
-         }
+                    return result;
+                })
+                .toList();
 
-         return response;
+        return response;
+
        
     }
-
-	
     
     @Override
-	public DiningEventResponse getDiningEvent(String eventId) {
-    	
-		
-		Event diningEvent=  userDao.getDiningEvent(eventId) ;
-		return diningEventResponseMapper.eventDiningResponse(diningEvent);
-		
-	}
+    public List<Event> getStoreByCategory(String categoryId) {
 
-	
-    @Override
-    @Transactional
-    public DiningBookingResponse bookingDining(
-            String userId,
-            String eventId,
-            DiningBookingRequest request) {
+        List<Event> events = userDao.getStoreByCategory(categoryId);
 
-        // 1. Validate guest count
-        diningBookingValidator.validateGuestCount(
-                request.getNumberOfGuests());
+        if (events.isEmpty()) {
+            throw new EventNotAvailableException(
+                    "No stores are available for this category"
+            );
+        }
 
-        // 2. Get user
-        User user = userDao.getUser(userId);
-
-        // 3. Get dining event
-        Event event = userDao.getDiningEvent(eventId);
-
-        // 4. Validate vendor
-        diningBookingValidator.validateVendor(event);
-
-        // 5. Get active slot
-        TimeSlot slot =
-                userDao.getActiveSlot(
-                        request.getSlotId(),
-                        event.getVendorId());
-
-        // 6. Validate slot
-        diningBookingValidator.validateSlot(slot);
-
-        // 7. Validate booking date
-        diningBookingValidator.validateBookingDate(
-                request.getBookingDate(),
-                slot);
-
-        // 8. Calculate amount
-        BigDecimal bookingAmount =
-                request.getBaseAmount();
-
-        BigDecimal gstPercentage =
-                new BigDecimal("18");
-
-        BigDecimal gstAmount =
-                bookingAmount
-                        .multiply(gstPercentage)
-                        .divide(new BigDecimal("100"));
-
-        BigDecimal convenienceFee =
-                new BigDecimal("30");
-
-        BigDecimal totalAmount =
-                bookingAmount
-                        .add(gstAmount)
-                        .add(convenienceFee);
-
-        // 9. Create booking
-        String bookingId =
-                "BOOK-" + UUID.randomUUID();
-
-        Booking booking = new Booking();
-
-        booking.setBookingId(bookingId);
-        booking.setUserId(userId);
-        booking.setId(eventId);
-        booking.setVendorId(event.getVendorId());
-        booking.setBookingDate(
-                request.getBookingDate());
-        booking.setSlotId(
-                request.getSlotId());
-        booking.setNumberOfGuests(
-                request.getNumberOfGuests());
-        booking.setTotalAmount(
-                totalAmount);
-        booking.setBookingStatus("PENDING");
-
-        booking.setCreatedAt(LocalDateTime.now());
-        booking.setCreatedBy(user.getRole());
-        booking.setUpdatedAt(LocalDateTime.now());
-        booking.setUpdatedBy(user.getRole());
-
-        userDao.saveBooking(booking);
-
-        // 10. Allocate tables
-        tableAllocationHandling.allocateTables(
-                event.getVendorId(),
-                bookingId,
-                request.getBookingDate(),
-                request.getSlotId(),
-                request.getNumberOfGuests());
-
-        // 11. Create payment
-        Payment payment = new Payment();
-
-        payment.setPaymentId(
-                "PAY-" + UUID.randomUUID());
-
-        payment.setBookingId(bookingId);
-
-        payment.setBookingAmount(
-                bookingAmount);
-
-        payment.setGstPercentage(
-                gstPercentage);
-
-        payment.setGstAmount(
-                gstAmount);
-
-        payment.setConvenienceFee(
-                convenienceFee);
-
-        payment.setTotalAmount(
-                totalAmount);
-
-        payment.setPaymentMethod(null);
-        payment.setPaymentStatus("PENDING");
-        payment.setTransactionId(null);
-        payment.setPaymentDate(
-                LocalDateTime.now());
-
-        userDao.savePayment(payment);
-
-        // 12. Response
-        return diningBookingResponseMapper.map(
-                booking,
-                slot,
-                payment,
-                event);
+        return events;
     }
+    
+    @Override
+    public List<StoreListResponse> getAllStores() {
+
+        return userDao.getAllStores();
+    }
+    
+    @Override
+    public StoreDetailsResponse getStoresDetails(String storeId) {
+
+        return userDao.getStoresDetails(storeId);
+    }
+    
+    @Override
+    public List<StoreProductResponse> getProducts() {
+
+        List<StoreProduct> products = userDao.getProducts();
+
+        return products.stream()
+                .map(product -> {
+
+                    StoreProductResponse response =
+                            new StoreProductResponse();
+
+                    response.setProductName(
+                            product.getProductName());
+
+                    response.setProductDescription(
+                            product.getProductDescription());
+
+                    response.setProductPrice(
+                            product.getProductPrice());
+
+                    response.setAvailableQuantity(
+                            product.getAvailableQuantity());
+
+                    response.setProductImage(
+                            product.getProductImage());
+
+                    return response;
+                })
+                .toList();
+    }
+    
+    @Override
+    public StoreProductResponse getProductById(String productId) {
+
+        StoreProduct product = userDao.getProductById(productId);
+
+        StoreProductResponse response = new StoreProductResponse();
+
+        response.setProductName(product.getProductName());
+        response.setProductDescription(product.getProductDescription());
+        response.setProductPrice(product.getProductPrice());
+        response.setAvailableQuantity(product.getAvailableQuantity());
+        response.setProductImage(product.getProductImage());
+
+        return response;
+    } 
+    
+ // COMMAND:
+    // Fetch all active and currently valid coupons
+    // for the coupon list screen.
+    @Override
+    public List<CouponResponse> getCouponList() {
+
+        // COMMAND:
+        // Get active coupons through the existing UserDao.
+        List<Coupon> coupons =
+                userDao.getActiveCoupons();
+
+        // COMMAND:
+        // Convert each Coupon entity into the response object.
+        return coupons.stream()
+                .map(coupon -> {
+
+                    // COMMAND:
+                    // Create the coupon response object.
+                    CouponResponse response =
+                            new CouponResponse();
+
+                    // COMMAND:
+                    // Set the coupon name/category.
+                    response.setName(
+                            coupon.getName());
+
+                    // COMMAND:
+                    // Set the coupon description.
+                    response.setDescription(
+                            coupon.getDescription());
+
+                    // COMMAND:
+                    // Set the coupon code.
+                    response.setCouponCode(
+                            coupon.getCouponCode());
+
+                    // COMMAND:
+                    // Set the image file name.
+                    response.setImage(
+                            coupon.getImage());
+
+                    // COMMAND:
+                    // Set the discount display text.
+                    response.setDiscountDisplay(
+                            coupon.getDiscountDisplay());
+                    
+                    response.setCategoryId(
+                            coupon.getCategoryId());
+
+                    return response;
+                })
+                .toList();
+    }
+       
+ // COMMAND:
+ // Validate the booking and coupon,
+ // then calculate the final booking amount.
+ @Override
+ public ApplyCouponResponse applyCoupon(
+         ApplyCouponRequest request) {
+
+     // COMMAND:
+     // Fetch the booking using its unique booking ID.
+     Booking booking;
+
+     try {
+         booking = userDao.getBookingById(
+                 request.getBookingId());
+
+     } catch (EmptyResultDataAccessException e) {
+
+         // COMMAND:
+         // Stop when the booking does not exist.
+         throw new RuntimeException(
+                 "Booking not found");
+     }
+
+     // COMMAND:
+     // Coupon can only be applied to a pending booking.
+     if (!"PENDING".equalsIgnoreCase(
+             booking.getBookingStatus())) {
+
+         throw new RuntimeException(
+                 "Coupon can be applied only to pending booking");
+     }
+
+     // COMMAND:
+     // Fetch the selected coupon using the coupon ID.
+     Coupon coupon;
+
+     try {
+         coupon = userDao.getCouponById(
+                 request.getCouponId());
+
+     } catch (EmptyResultDataAccessException e) {
+
+         // COMMAND:
+         // Stop when the selected coupon does not exist.
+         throw new RuntimeException(
+                 "Coupon not found");
+     }
+
+     // COMMAND:
+     // Make sure the coupon is currently ACTIVE.
+     if (!"ACTIVE".equalsIgnoreCase(
+             coupon.getStatus())) {
+
+         throw new RuntimeException(
+                 "Coupon is not active");
+     }
+
+     // COMMAND:
+     // Get today's date for coupon validity validation.
+     LocalDate today = LocalDate.now();
+
+     // COMMAND:
+     // Reject the coupon when it has not started yet.
+     if (today.isBefore(coupon.getValidFrom())) {
+
+         throw new RuntimeException(
+                 "Coupon is not yet valid");
+     }
+
+     // COMMAND:
+     // Reject the coupon when it has expired.
+     if (today.isAfter(coupon.getValidUntil())) {
+
+         throw new RuntimeException(
+                 "Coupon has expired");
+     }
+     
+     
+     // Weekday / Weekend validation
+     LocalDateTime now = LocalDateTime.now();
+
+     if ("WEEKEND".equalsIgnoreCase(coupon.getOfferType())) {
+
+         if (!OfferCalculation.isWeekend(now)) {
+             throw new RuntimeException(
+                     "This coupon is valid only on weekends");
+         }
+     }
+
+     if ("WEEKDAY".equalsIgnoreCase(coupon.getOfferType())) {
+
+         if (!OfferCalculation.isWeekday(now)) {
+             throw new RuntimeException(
+                     "This coupon is valid only on weekdays");
+         }
+     }
+
+     // COMMAND:
+     // Get the original booking amount.
+     BigDecimal bookingAmount =
+             booking.getTotalAmount();
+
+     // COMMAND:
+     // Validate the minimum booking amount required
+     // for the selected coupon.
+     if (coupon.getMinimumBookingAmount() != null
+             && bookingAmount.compareTo(
+                     coupon.getMinimumBookingAmount()) < 0) {
+
+         throw new RuntimeException(
+                 "Minimum booking amount required is "
+                 + coupon.getMinimumBookingAmount());
+     }
+
+     // COMMAND:
+     // Calculate the offer amount using the offer type,
+     // discount type, discount value and maximum discount.
+     BigDecimal offerAmount =
+             OfferCalculation.calculateDiscount(
+                     bookingAmount,
+                     coupon.getDiscountValue(),
+                     coupon.getDiscountType(),
+                     coupon.getOfferType(),
+                     coupon.getMaximumDiscount());
+
+     // COMMAND:
+     // Calculate the final booking amount after applying
+     // the coupon discount.
+     BigDecimal finalAmount =
+             OfferCalculation.calculateFinalAmount(
+                     bookingAmount,
+                     offerAmount);
+
+     // COMMAND:
+     // Create the coupon application response.
+     ApplyCouponResponse response =
+             new ApplyCouponResponse();
+
+     // COMMAND:
+     // Set the original booking amount.
+     response.setTotalAmount(
+             bookingAmount);
+
+     // COMMAND:
+     // Set the calculated offer amount.
+     response.setOfferAmount(
+             offerAmount);
+
+     // COMMAND:
+     // Set the final amount after applying the coupon.
+     response.setFinalAmount(
+             finalAmount);
+
+     // COMMAND:
+     // Return the coupon calculation result.
+     return response;
+ }
+ 
+ @Override
+ public CouponApplicableDetailsResponse getApplicableCouponDetails(
+         String couponId) {
+
+     // Get coupon details for discount calculation
+     Coupon coupon;
+
+     try {
+         coupon = userDao.getCouponById(couponId);
+
+     } catch (EmptyResultDataAccessException e) {
+
+         throw new RuntimeException("Coupon not found");
+     }
+
+     // Check coupon status
+     if (!"ACTIVE".equalsIgnoreCase(coupon.getStatus())) {
+
+         throw new RuntimeException("Coupon is not active");
+     }
+
+     // Check coupon validity dates
+     LocalDate today = LocalDate.now();
+
+     if (today.isBefore(coupon.getValidFrom())) {
+
+         throw new RuntimeException("Coupon is not yet valid");
+     }
+
+     if (today.isAfter(coupon.getValidUntil())) {
+
+         throw new RuntimeException("Coupon has expired");
+     }
+
+     // Check weekday / weekend offer
+     LocalDateTime now = LocalDateTime.now();
+
+     if ("WEEKEND".equalsIgnoreCase(coupon.getOfferType())) {
+
+         if (!OfferCalculation.isWeekend(now)) {
+
+             throw new RuntimeException(
+                     "This coupon is valid only on weekends");
+         }
+     }
+
+     if ("WEEKDAY".equalsIgnoreCase(coupon.getOfferType())) {
+
+         if (!OfferCalculation.isWeekday(now)) {
+
+             throw new RuntimeException(
+                     "This coupon is valid only on weekdays");
+         }
+     }
+
+     // Get category details
+     CouponApplicableDetailsResponse response;
+
+     try {
+
+         response = userDao.getApplicableCouponDetails(couponId);
+
+     } catch (EmptyResultDataAccessException e) {
+
+         throw new RuntimeException(
+                 "Applicable category details not found");
+     }
+
+     // Original category price
+     BigDecimal categoryPrice =
+             response.getCategoryPrice();
+
+     // Check minimum amount
+     if (coupon.getMinimumBookingAmount() != null
+             && categoryPrice.compareTo(
+                     coupon.getMinimumBookingAmount()) < 0) {
+
+         throw new RuntimeException(
+                 "Minimum booking amount required is "
+                 + coupon.getMinimumBookingAmount());
+     }
+
+     // Calculate discount
+     BigDecimal offerAmount =
+             OfferCalculation.calculateDiscount(
+                     categoryPrice,
+                     coupon.getDiscountValue(),
+                     coupon.getDiscountType(),
+                     coupon.getOfferType(),
+                     coupon.getMaximumDiscount());
+
+     // Calculate amount after discount
+     BigDecimal totalAmount =
+             OfferCalculation.calculateFinalAmount(
+                     categoryPrice,
+                     offerAmount);
+
+     // Set calculated values in response
+     response.setOfferAmount(offerAmount);
+     response.setTotalAmount(totalAmount);
+
+     return response;
+ }
+   
 }
 
-	
    
 
