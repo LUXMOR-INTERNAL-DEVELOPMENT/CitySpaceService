@@ -1,5 +1,6 @@
 package app.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,19 +8,21 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-
-import app.dto.AvailableTable;
-import app.dto.BookingTableAllocation;
-import app.entity.Booking;
+import app.dto.ReviewRequest;
+import app.entity.Category;
 import app.entity.Event;
-import app.entity.Payment;
-import app.entity.Restaurant;
-import app.entity.TimeSlot;
+
+import app.entity.Offer;
+import app.entity.RestaurantDetails;
+import app.entity.Review;
 import app.entity.User;
-import app.mapper.AvailableTableRowMapper;
+import app.mapper.CategoryRowMapper;
 import app.mapper.EventRowMapper;
-import app.mapper.RestaurantRowMapper;
-import app.mapper.TimeSlotRowMapper;
+
+import app.mapper.OfferRowMapper;
+import app.mapper.RestaurantDetailsRowMapper;
+
+import app.mapper.ReviewRowMapper;
 import app.mapper.UserRowMapper;
 
 @Repository
@@ -30,6 +33,9 @@ public class UserRepository {
 
     @Value("${event.getActiveEvents}")
     private String getActiveEventsQuery;
+    
+    @Value("${event.getRatings}")
+    private String getRatingsQuery;
 
     @Value("${user.getUserById}")
     private String getUserByIdQuery;
@@ -43,23 +49,29 @@ public class UserRepository {
     @Value("${event.getDiningevent}")
     private String getDiningEventDetailsQuery;
 
-    @Value("${event.bookingDining}")
-    private String bookingDiningQuery;
+    @Value("${category.getCategories}")
+    private String getCategoriesQuery;
 
-    @Value("${event.tableBooking}")
-    private String tableBookingQuery;
+    @Value("${event.getOffers}")
+    private String getOffersQuery;
 
-    @Value("${event.payment}")
-    private String paymentQuery;
+    @Value("${event.getReviews}")
+    private String getReviewsQuery;
 
-    @Value("${event.getTimeSlot}")
-    private String getTimeSlotQuery;
+    @Value("${event.getRestaurantDetails}")
+    private String getRestaurantDetailsQuery;
+   
+    
+    @Value("${event.incrementClickCount}")
+    private String incrementClickCountQuery;
+    
+    
+    
+   
 
-    @Value("${event.getAvailableTables}")
-    private String getAvailableTablesQuery;
 
-    @Value("${event.getTablesForUpdate}")
-    private String getTablesForUpdateQuery;
+    @Autowired
+    private CategoryRowMapper categoryRowMapper;
 
     @Autowired
     private UserRowMapper userRowMapper;
@@ -68,13 +80,13 @@ public class UserRepository {
     private EventRowMapper eventRowMapper;
 
     @Autowired
-    private TimeSlotRowMapper timeSlotRowMapper;
+    private OfferRowMapper offerRowMapper;
 
     @Autowired
-    private AvailableTableRowMapper availableTableRowMapper;
+    private ReviewRowMapper restaurantReviewRowMapper;
 
     @Autowired
-    private RestaurantRowMapper restaurantRowMapper;
+    private RestaurantDetailsRowMapper restaurantDetailsRowMapper;
 
 
     public List<Event> getActiveEvents() {
@@ -82,6 +94,16 @@ public class UserRepository {
         return jdbcTemplate.query(
                 getActiveEventsQuery,
                 eventRowMapper
+        );
+    }
+
+
+    public List<Category> getCategories(String categoryName) {
+
+        return jdbcTemplate.query(
+                getCategoriesQuery,
+                categoryRowMapper,
+                categoryName
         );
     }
 
@@ -131,99 +153,52 @@ public class UserRepository {
     }
 
 
-    public int saveBooking(Booking booking) {
-
-        return jdbcTemplate.update(
-                bookingDiningQuery,
-
-                booking.getBookingId(),
-                booking.getUserId(),
-                booking.getId(),
-                booking.getVendorId(),
-                booking.getBookingDate(),
-                booking.getSlotId(),
-                booking.getNumberOfGuests(),
-                booking.getTotalAmount(),
-                booking.getBookingStatus(),
-                booking.getCreatedAt(),
-                booking.getCreatedBy(),
-                booking.getUpdatedAt(),
-                booking.getUpdatedBy()
-        );
-    }
-
-
-    public int saveBookingTableAllocation(
-            BookingTableAllocation bookingTable) {
-
-        return jdbcTemplate.update(
-                tableBookingQuery,
-
-                bookingTable.getBookingTableAllocationId(),
-                bookingTable.getBookingId(),
-                bookingTable.getTableId(),
-                bookingTable.getSlotId(),
-                bookingTable.getBookingDate(),
-                bookingTable.getNumberOfGuests(),
-                bookingTable.getBookingStatus()
-        );
-    }
-
-
-    public int savePayment(Payment payment) {
-
-        return jdbcTemplate.update(
-                paymentQuery,
-                payment.getPaymentId(),
-                payment.getBookingId(),
-                payment.getBookingAmount(),
-                payment.getGstPercentage(),
-                payment.getGstAmount(),
-                payment.getConvenienceFee(),
-                payment.getTotalAmount(),
-                payment.getPaymentMethod(),
-                payment.getPaymentStatus(),
-                payment.getTransactionId(),
-                payment.getPaymentDate()
-        );
-    }
-
-
-    public List<AvailableTable> getAvailableTables(
-            String vendorId,
-            String bookingDate,
-            String slotId) {
+    // Get active offers for the event
+    public List<Offer> getOffers(String eventId) {
 
         return jdbcTemplate.query(
-                getAvailableTablesQuery,
-                availableTableRowMapper,
-                vendorId,
-                bookingDate,
-                slotId
+                getOffersQuery,
+                offerRowMapper,
+                eventId
         );
     }
 
 
-    public TimeSlot getActiveSlot(
-            String slotId,
-            String vendorId) {
-
-        return jdbcTemplate.queryForObject(
-                getTimeSlotQuery,
-                timeSlotRowMapper,
-                slotId,
-                vendorId
-        );
-    }
-
-
-    public List<Restaurant> getTablesForUpdate(
-            String vendorId) {
+    // Get reviews for the event
+    public List<Review> getReviews(String eventId) {
 
         return jdbcTemplate.query(
-                getTablesForUpdateQuery,
-                restaurantRowMapper,
-                vendorId
+                getReviewsQuery,
+                restaurantReviewRowMapper,
+                eventId
         );
     }
+    
+    
+
+    
+ 
+ // Get restaurant details for the event
+    public RestaurantDetails getRestaurantDetails(String eventId) {
+
+        List<RestaurantDetails> restaurantDetails = jdbcTemplate.query(
+                getRestaurantDetailsQuery,
+                restaurantDetailsRowMapper,
+                eventId
+        );
+
+        if (restaurantDetails.isEmpty()) {
+            return null;
+        }
+
+        return restaurantDetails.get(0);
+    }
+
+    
+    public void incrementClickCount(String eventId) {
+        jdbcTemplate.update(incrementClickCountQuery, eventId);
+    }
+    
+
+   
 }

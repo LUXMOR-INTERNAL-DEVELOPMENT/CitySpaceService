@@ -1,5 +1,8 @@
 package app.util;
 
+
+
+
 public class LocationUtil {
 
     public static String getLocality(String fullAddress) {
@@ -14,6 +17,10 @@ public class LocationUtil {
             return fullAddress.trim();
         }
 
-        return parts[2].trim();
+        String venue = parts[0].trim();
+        String locality = parts[2].trim().replaceAll("\\s*-?\\s*\\d{6}\\s*$", "");
+
+        return venue + ", " + locality;
     }
 }
+

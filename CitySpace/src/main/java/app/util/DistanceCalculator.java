@@ -1,5 +1,8 @@
 package app.util;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class DistanceCalculator {
 
     private static final double EARTH_RADIUS_KM = 6371.0;

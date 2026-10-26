@@ -12,48 +12,62 @@ import app.entity.Event;
 
 @Component
 public class GetPopularityEvents {
-	   @Autowired
-	    private GetNearByEvents getNearEvents;
 
-	    public List<Event> getPopularityEvents(
-	            String userId,
-	            Double latitude,
-	            Double longitude,
-	            String location,
-	            double radius) {
 
-	        List<Event> nearbyEvents =
-	                getNearEvents.getNearbyEvents(
-	                        userId,
-	                        latitude,
-	                        longitude,
-	                        location,
-	                        radius
-	                );
+@Autowired
+private GetNearByEvents getNearEvents;
 
-	        Map<String, Event> topEventsByCategory =
-	                new HashMap<>();
+@Autowired
+private RatingCalculation ratingCalculation;
 
-	        for (Event event : nearbyEvents) {
+public List<Event> getPopularityEvents(
+        String userId,
+        Double latitude,
+        Double longitude,
+        String location,
+        double radius) {
 
-	            String category =
-	                    event.getCategoryName();
+    List<Event> nearbyEvents =
+            getNearEvents.getNearbyEvents(
+                    userId,
+                    latitude,
+                    longitude,
+                    location,
+                    radius
+            );
 
-	            if (!topEventsByCategory.containsKey(category)
-	                    || event.getRating()
-	                    > topEventsByCategory
-	                            .get(category)
-	                            .getRating()) {
+    Map<String, Event> topEventsByCategory =
+            new HashMap<>();
 
-	                topEventsByCategory.put(
-	                        category,
-	                        event
-	                );
-	            }
-	        }
+    Map<String, Double> topRatingsByCategory =
+            new HashMap<>();
 
-	        return new ArrayList<>(
-	                topEventsByCategory.values()
-	        );
-	    }
+    for (Event event : nearbyEvents) {
+
+        String category = event.getCategoryName();
+
+        double averageRating =
+                ratingCalculation.calculateEventRating(
+                        event.getId()
+                );
+
+        if (!topEventsByCategory.containsKey(category)
+                || averageRating
+                > topRatingsByCategory.get(category)) {
+
+            topEventsByCategory.put(category, event);
+
+            topRatingsByCategory.put(
+                    category,
+                    averageRating
+            );
+        }
+    }
+
+    return new ArrayList<>(
+            topEventsByCategory.values()
+    );
+}
+
+
 }

@@ -1,58 +1,46 @@
 package app.service.impl;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.HashMap;
+
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import app.dao.impl.UserDaoImpl;
-import app.dto.AvailableTable;
-import app.dto.BookingTableAllocation;
-import app.dto.DiningBookingRequest;
-import app.dto.DiningBookingResponse;
+import app.dto.CategoryItemResponse;
+import app.dto.CategoryPageResponse;
+import app.dto.CategoryResponse;
 import app.dto.DiningEventResponse;
 import app.dto.EvenFilterRequest;
 import app.dto.EventFilterResponse;
 import app.dto.EventResponse;
+import app.dto.HomeResponse;
+import app.dto.ReviewRequest;
 import app.dto.StatusUpdate;
+import app.dto.UpcomingEventResponse;
 import app.dto.UserResponse;
 import app.dto.UserUpdateProfileRequest;
-import app.entity.Booking;
+import app.entity.Category;
 import app.entity.Event;
-import app.entity.Payment;
-import app.entity.Restaurant;
-import app.entity.TimeSlot;
+import app.entity.Offer;
+import app.entity.RestaurantDetails;
+import app.entity.Review;
 import app.entity.User;
 import app.exception.AccessDeniedException;
 import app.exception.EventNotAvailableException;
-import app.exception.InvalidBookingDateException;
-import app.exception.InvalidGuestCountException;
-import app.exception.SlotExpiredException;
-import app.exception.SlotNotAvailableException;
-import app.exception.TableNotAvailableException;
 import app.exception.UserIdNotFoundException;
-import app.exception.VendorNotAvailableException;
-import app.mapper.DiningBookingResponseMapper;
 import app.mapper.DiningEventResponseMapper;
 import app.mapper.EventFilterMapper;
 import app.mapper.EventResponseFilterMapper;
 import app.mapper.EventResponseMapper;
+import app.mapper.UpcomingEventMapper;
 import app.mapper.UserResponseMapper;
 import app.service.UserService;
-import app.util.DiningBookingValidator;
-import app.util.GetNearByEvents;
-import app.util.TableAllocationHandling;
-import jakarta.transaction.Transactional;
-
+import app.util.RatingCalculation;
+import app.util.RatingUtil;
+import jakarta.validation.Valid;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -65,35 +53,36 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private EventResponseMapper eventResponseMapper;
-    
+
     @Autowired
     private EventResponseFilterMapper eventFilterResponse;
-    
+
     @Autowired
-    private EventFilterMapper  eventFilterMapper;
-    
+    private EventFilterMapper eventFilterMapper;
+
     @Autowired
     private DiningEventResponseMapper diningEventResponseMapper;
-    
+
     @Autowired
-    private DiningBookingResponseMapper diningBookingResponseMapper;
-    
+    private UpcomingEventMapper upcomingEventMapper;
+
     @Autowired
-    private DiningBookingValidator diningBookingValidator;
-    
+    private RatingUtil ratingUtil;
+
     @Autowired
-    private TableAllocationHandling  tableAllocationHandling;
-   
+    private RatingCalculation ratingCalculation;
+    
 
     @Override
-    public List<Event> getAllEvents(
+    public HomeResponse getHomeEvents(
             String userId,
             Double latitude,
             Double longitude,
             String location,
             double radius) {
 
-        List<Event> event =
+        // Overall events
+        List<Event> overallEventList =
                 userDao.getAllEvents(
                         userId,
                         latitude,
@@ -102,24 +91,19 @@ public class UserServiceImpl implements UserService {
                         radius
                 );
 
-        if (event.isEmpty()) {
-            throw new EventNotAvailableException(
-                    "Events are not scheduled or available in the surrounding area"
-            );
-        }
+        Map<String, Double> overallRatings =ratingCalculation.
+                calculateEventRatings(overallEventList);
 
-        return event;
-    }
+        List<EventResponse> overallEvents =
+                overallEventList.isEmpty()
+                        ? List.of()
+                        : eventResponseMapper.eventResponse(
+                                overallEventList,
+                                overallRatings
+                        );
 
-    @Override
-    public List<EventResponse> TopPopularityEvents(
-            String userId,
-            Double latitude,
-            Double longitude,
-            String location,
-            double radius) {
-
-        List<Event> events =
+        // Popular events
+        List<Event> popularEventList =
                 userDao.TopPopularityEvent(
                         userId,
                         latitude,
@@ -128,28 +112,41 @@ public class UserServiceImpl implements UserService {
                         radius
                 );
 
-        List<EventResponse> response =
-                eventResponseMapper.eventResponse(events);
+        Map<String, Double> popularRatings =ratingCalculation.
+                calculateEventRatings(popularEventList);
 
-        if (response.isEmpty()) {
-            throw new EventNotAvailableException(
-                    "Events are not scheduled or available in the surrounding area"
-            );
-        }
+        List<EventResponse> popularEvents =
+                popularEventList.isEmpty()
+                        ? List.of()
+                        : eventResponseMapper.eventResponse(
+                                popularEventList,
+                                popularRatings
+                        );
 
-        return response;
-    }
-    
+        // Upcoming events
+        List<Event> upcomingEventList =
+                userDao.getUpcomingEvents(
+                        userId,
+                        latitude,
+                        longitude,
+                        location,
+                        radius
+                );
 
-    @Override
-    public List<EventResponse> weekEndEvents(
-            String userId,
-            Double latitude,
-            Double longitude,
-            String location,
-            double radius) {
+        Map<String, Double> upcomingRatings =ratingCalculation.
+                calculateEventRatings(upcomingEventList);
 
-        List<Event> events =
+        List<UpcomingEventResponse> upcomingEvents =
+                upcomingEventList.isEmpty()
+                        ? List.of()
+                        : upcomingEventMapper
+                                .eventResponseUpcomingEvents(
+                                        upcomingEventList,
+                                        upcomingRatings
+                                );
+
+        // Weekend events
+        List<Event> weekendEventList =
                 userDao.weekEndEvents(
                         userId,
                         latitude,
@@ -158,16 +155,47 @@ public class UserServiceImpl implements UserService {
                         radius
                 );
 
-        List<EventResponse> response =
-                eventResponseMapper.eventResponse(events);
+        Map<String, Double> weekendRatings =ratingCalculation.
+                calculateEventRatings(weekendEventList);
 
-        if (response.isEmpty()) {
-            throw new EventNotAvailableException(
-                    "Events are not scheduled or available in the surrounding area"
-            );
-        }
+        List<EventResponse> weekendEvents =
+                weekendEventList.isEmpty()
+                        ? List.of()
+                        : eventResponseMapper.eventResponse(
+                                weekendEventList,
+                                weekendRatings
+                        );
+        
+     // Recommended events
+        
+        		List<Event> recommendedEventList =
+                userDao.getRecommendedEvents(
+                        userId,
+                        latitude,
+                        longitude,
+                        location,
+                        radius
+                );
 
-        return response;
+        Map<String, Double> recommendedRatings =
+                ratingCalculation.calculateEventRatings(
+                        recommendedEventList
+                );
+
+        List<EventResponse> recommendedEvents =
+                recommendedEventList.isEmpty()
+                        ? List.of()
+                        : eventResponseMapper.eventResponse(
+                                recommendedEventList,
+                                recommendedRatings
+                        );
+        return new HomeResponse(
+                overallEvents,
+                popularEvents,
+                upcomingEvents,
+                weekendEvents,
+                recommendedEvents
+        );
     }
 
     @Override
@@ -193,7 +221,9 @@ public class UserServiceImpl implements UserService {
         if (!user_id.equals(user.getUserId())
                 || "VENDOR".equals(role)) {
 
-            throw new AccessDeniedException("You cannot have access to modify profile");
+            throw new AccessDeniedException(
+                    "You cannot have access to modify profile"
+            );
         }
 
         return userDao.updateProfileById(
@@ -209,13 +239,15 @@ public class UserServiceImpl implements UserService {
             String role,
             StatusUpdate status) {
 
-    	 User user = userDao.getUser(user_id);
+        User user = userDao.getUser(user_id);
 
-    	    if (!user_id.equals(user.getUserId())
-    	            || "VENDOR".equals(role)) {
+        if (!user_id.equals(user.getUserId())
+                || "VENDOR".equals(role)) {
 
-    	        throw new AccessDeniedException("You cannot have access to modify profile");
-    	    }
+            throw new AccessDeniedException(
+                    "You cannot have access to modify profile"
+            );
+        }
 
         return userDao.updateStatus(
                 user_id,
@@ -228,186 +260,128 @@ public class UserServiceImpl implements UserService {
     public List<EventFilterResponse> getFilteredEvents(
             EvenFilterRequest filter) {
 
-
         List<Event> events = userDao.getActiveEvents();
 
+        Map<String, Double> averageRatings =ratingCalculation.
+                calculateEventRatings(events);
 
         List<Event> filteredEvents =
-                eventFilterMapper.filter(events, filter);
+                eventFilterMapper.filter(
+                        events,
+                        filter,
+                        averageRatings
+                );
 
-
-        List<EventFilterResponse> response =eventFilterResponse.response(filteredEvents);
-
-
-        return response;
+        return eventFilterResponse.response(
+                filteredEvents,
+                averageRatings
+        );
     }
-    
+
     @Override
-    public List<EventResponse> getEventsByCategory(
-            String categoryId,
+    public CategoryPageResponse getCategoryEvents(
+            String categoryName,
+            String subCategoryName,
             String userId,
             Double latitude,
             Double longitude,
             String location,
             double radius) {
 
-        
-    	 List<Event> events =
-                 userDao.getNearbyEventsByCategory(categoryId, userId, latitude, longitude, location, radius);
+        List<Event> events =
+                userDao.getNearbyCategoryEvents(
+                        categoryName,
+                        subCategoryName,
+                        userId,
+                        latitude,
+                        longitude,
+                        location,
+                        radius
+                );
 
-         List<EventResponse> response =
-                 eventResponseMapper.eventResponse(events);
+        Map<String, Double> averageRatings =ratingCalculation.
+                calculateEventRatings(events);
 
-         if (response.isEmpty()) {
-             throw new EventNotAvailableException(
-                     "Events are not scheduled or available in the surrounding area"
-             );
-         }
+        List<CategoryItemResponse> items =
+                eventResponseMapper.categoryItemResponse(
+                        events,
+                        averageRatings
+                );
 
-         return response;
-       
+        if (items.isEmpty()) {
+            throw new EventNotAvailableException(
+                    "No " + categoryName
+                            + " events are scheduled or available "
+                            + "in the surrounding area"
+            );
+        }
+
+        // If a subcategory is selected, return only matching items.
+        if (subCategoryName != null
+                && !subCategoryName.isBlank()) {
+
+            return new CategoryPageResponse(
+                    null,
+                    items
+            );
+        }
+
+        // Fetch categories for the selected main category.
+        List<Category> categoryList =
+                userDao.getCategories(categoryName);
+
+        List<CategoryResponse> categories =
+                categoryList.stream()
+                        .map(category -> new CategoryResponse(
+                                category.getCategoryId(),
+                                category.getCategoryName(),
+                                category.getCategoryImage()
+                        ))
+                        .toList();
+
+        return new CategoryPageResponse(
+                categories,
+                items
+        );
     }
 
-	
-    
     @Override
-	public DiningEventResponse getDiningEvent(String eventId) {
-    	
-		
-		Event diningEvent=  userDao.getDiningEvent(eventId) ;
-		return diningEventResponseMapper.eventDiningResponse(diningEvent);
-		
-	}
+    public DiningEventResponse getDiningEvent(String eventId) {
 
-	
-    @Override
-    @Transactional
-    public DiningBookingResponse bookingDining(
-            String userId,
-            String eventId,
-            DiningBookingRequest request) {
+        Event diningEvent = userDao.getDiningEvent(eventId);
 
-        // 1. Validate guest count
-        diningBookingValidator.validateGuestCount(
-                request.getNumberOfGuests());
+        if (diningEvent == null) {
+            throw new EventNotAvailableException(
+                    "Event not available: " + eventId
+            );
+        }
 
-        // 2. Get user
-        User user = userDao.getUser(userId);
+        // Increment the click count for this event
+        userDao.incrementClickCount(eventId);
 
-        // 3. Get dining event
-        Event event = userDao.getDiningEvent(eventId);
+        List<Double> ratings = userDao.getRatingsByEventId(eventId);
 
-        // 4. Validate vendor
-        diningBookingValidator.validateVendor(event);
+        double averageRating =
+                ratingCalculation.calculateEventRating(eventId);
 
-        // 5. Get active slot
-        TimeSlot slot =
-                userDao.getActiveSlot(
-                        request.getSlotId(),
-                        event.getVendorId());
+        List<Offer> offers = userDao.getOffers(eventId);
+        List<Review> reviews = userDao.getReviews(eventId);
 
-        // 6. Validate slot
-        diningBookingValidator.validateSlot(slot);
+        RestaurantDetails menu =
+                userDao.getRestaurantDetails(eventId);
 
-        // 7. Validate booking date
-        diningBookingValidator.validateBookingDate(
-                request.getBookingDate(),
-                slot);
-
-        // 8. Calculate amount
-        BigDecimal bookingAmount =
-                request.getBaseAmount();
-
-        BigDecimal gstPercentage =
-                new BigDecimal("18");
-
-        BigDecimal gstAmount =
-                bookingAmount
-                        .multiply(gstPercentage)
-                        .divide(new BigDecimal("100"));
-
-        BigDecimal convenienceFee =
-                new BigDecimal("30");
-
-        BigDecimal totalAmount =
-                bookingAmount
-                        .add(gstAmount)
-                        .add(convenienceFee);
-
-        // 9. Create booking
-        String bookingId =
-                "BOOK-" + UUID.randomUUID();
-
-        Booking booking = new Booking();
-
-        booking.setBookingId(bookingId);
-        booking.setUserId(userId);
-        booking.setId(eventId);
-        booking.setVendorId(event.getVendorId());
-        booking.setBookingDate(
-                request.getBookingDate());
-        booking.setSlotId(
-                request.getSlotId());
-        booking.setNumberOfGuests(
-                request.getNumberOfGuests());
-        booking.setTotalAmount(
-                totalAmount);
-        booking.setBookingStatus("PENDING");
-
-        booking.setCreatedAt(LocalDateTime.now());
-        booking.setCreatedBy(user.getRole());
-        booking.setUpdatedAt(LocalDateTime.now());
-        booking.setUpdatedBy(user.getRole());
-
-        userDao.saveBooking(booking);
-
-        // 10. Allocate tables
-        tableAllocationHandling.allocateTables(
-                event.getVendorId(),
-                bookingId,
-                request.getBookingDate(),
-                request.getSlotId(),
-                request.getNumberOfGuests());
-
-        // 11. Create payment
-        Payment payment = new Payment();
-
-        payment.setPaymentId(
-                "PAY-" + UUID.randomUUID());
-
-        payment.setBookingId(bookingId);
-
-        payment.setBookingAmount(
-                bookingAmount);
-
-        payment.setGstPercentage(
-                gstPercentage);
-
-        payment.setGstAmount(
-                gstAmount);
-
-        payment.setConvenienceFee(
-                convenienceFee);
-
-        payment.setTotalAmount(
-                totalAmount);
-
-        payment.setPaymentMethod(null);
-        payment.setPaymentStatus("PENDING");
-        payment.setTransactionId(null);
-        payment.setPaymentDate(
-                LocalDateTime.now());
-
-        userDao.savePayment(payment);
-
-        // 12. Response
-        return diningBookingResponseMapper.map(
-                booking,
-                slot,
-                payment,
-                event);
+        return diningEventResponseMapper.eventDiningResponse(
+                diningEvent,
+                offers,
+                reviews,
+                menu,
+                averageRating
+        );
     }
+
 }
+
+
 
 	
    

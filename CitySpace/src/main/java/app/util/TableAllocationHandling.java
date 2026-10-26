@@ -6,17 +6,18 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import app.dao.UserBookingDao;
 import app.dao.UserDao;
 import app.dto.AvailableTable;
 import app.dto.BookingTableAllocation;
-import app.entity.Restaurant;
+import app.entity.RestaurantTable;
 import app.exception.TableNotAvailableException;
 import jakarta.transaction.Transactional;
 
 @Component
 public class TableAllocationHandling {
 	@Autowired
-    private UserDao userDao;
+    private UserBookingDao userDao;
 
     @Transactional
     public void allocateTables(
@@ -27,7 +28,7 @@ public class TableAllocationHandling {
             int numberOfGuests) {
 
         // Lock tables for concurrency
-        List<Restaurant> tables =
+        List<RestaurantTable> tables =
                 userDao.getTablesForUpdate(vendorId);
 
         if (tables == null || tables.isEmpty()) {
