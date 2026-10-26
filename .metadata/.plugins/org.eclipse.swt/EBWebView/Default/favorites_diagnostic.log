@@ -305,3 +305,13 @@
 2026-09-07 05:31:47.935: [INFO] BookmarksLoadDropped droppedNodes=0
 2026-09-07 05:31:47.935: [INFO] BookmarksSnapshot Startup total=0 bar=0 other=0 mobile=0 showBar=0 showBarNTP=1
 2026-09-07 06:19:33.529: [INFO] BookmarksSnapshot Shutdown total=0 bar=0 other=0 mobile=0 showBar=0 showBarNTP=1
+2026-10-26 05:57:49.519: [INFO] CurrentProfilePath: C:\Users\karth\OneDrive\Desktop\copy clone 2\CitySpaceService\.metadata\.plugins\org.eclipse.swt\EBWebView\Default
+2026-10-26 05:57:49.519: [INFO] Profiles total count: 1
+2026-10-26 05:57:49.520: [INFO] Profile: name=Profile 1 path=C:\Users\karth\OneDrive\Desktop\copy clone 2\CitySpaceService\.metadata\.plugins\org.eclipse.swt\EBWebView\Default lastActive=2026-09-06T09:53:29.263Z
+2026-10-26 05:57:49.520: [INFO] LastUsedProfileDir: C:\Users\karth\OneDrive\Desktop\copy clone 2\CitySpaceService\.metadata\.plugins\org.eclipse.swt\EBWebView\Default
+2026-10-26 05:57:49.520: [INFO] MostRecentlyActiveProfile: name=Profile 1 path=C:\Users\karth\OneDrive\Desktop\copy clone 2\CitySpaceService\.metadata\.plugins\org.eclipse.swt\EBWebView\Default lastActive=2026-09-06T09:53:29.263Z
+2026-10-26 05:57:49.520: [INFO] OnDoneLoading sync enabled: 0
+2026-10-26 05:57:49.520: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-10-26 05:57:49.520: [INFO] BookmarksLoadDropped droppedNodes=0
+2026-10-26 05:57:49.520: [INFO] BookmarksSnapshot Startup total=0 bar=0 other=0 mobile=0 showBar=0 showBarNTP=1
+2026-10-26 05:57:58.455: [INFO] BookmarksSnapshot Shutdown total=0 bar=0 other=0 mobile=0 showBar=0 showBarNTP=1
